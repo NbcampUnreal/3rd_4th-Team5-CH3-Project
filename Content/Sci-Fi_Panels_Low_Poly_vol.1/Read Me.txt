@@ -1,0 +1,36 @@
+Hey guys! Eugene Apekin and me are glad to introduce our cooperative project. 
+
+This  low poly sci_fi panels was made to let you spend less time for modeling and more for your ready ideas.
+
+
+Features:
+
+10 Panels - 2x2
+10 Panels - 2x4
+Bonus -  pipes and pipes connectors. 
+PBR textures for Unreal, Unity, Vray. Substance painter maps to create personal variant of material.
+Texture Size: 4096*4096
+LODs: No
+Can be used to construct levels.
+Models are saved in OBJ and FBX files.
+
+
+More information:
+
+https://www.artstation.com/artwork/A9wVBq
+
+
+Follow me:
+
+https://www.artstation.com/olegushenok
+
+https://twitter.com/olegushenok
+
+https://www.instagram.com/oleg_ushenok
+
+https://www.facebook.com/oleg.ushenok.39
+
+https://www.artstation.com/eugeneapekin
+
+
+Reselling these assets is not allowed, but other than that they are free to use in private and commercial use.
