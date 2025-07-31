@@ -17,17 +17,33 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UProjectileMovementComponent> ProjectileMovement;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
+	float Damage;
+	
 public:	
 	virtual void Tick(float DeltaTime) override;
 
+	//불릿이 Pawn을 상속받는 캐릭터에 오버랩 시 동작하도록 설정
 	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
+	void OnOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComponent,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+	); 
 
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UStaticMeshComponent> StaticMesh;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Bullet")
+	float DefaultDamage = 10.0f;
 
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<class UProjectileMovementComponent> ProjectileMovement;
-
+	
+	
 };
