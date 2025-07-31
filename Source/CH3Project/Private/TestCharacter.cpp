@@ -32,3 +32,8 @@ void ATestCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 }
 
+//이걸 추후에 캐릭터에 작성해주세요
+FVector ATestCharacter::GetAimTargetLocation() const
+{
+	return GetActorLocation() + GetActorForwardVector() * 10000.0f; // 기본적으로 정면으로 10,000 유닛
+}
