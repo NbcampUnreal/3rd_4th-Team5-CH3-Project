@@ -16,34 +16,27 @@ class CH3PROJECT_API ABaseAIController : public AAIController
 public:
 	ABaseAIController();
 
+	FORCEINLINE UBlackboardComponent* GetBlackboardComponent() const 
+	{ 
+		return BlackboardComp; 
+	}
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+	UBehaviorTree* BehaviorTree;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UAIPerceptionComponent* AIPerception;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	UAISenseConfig_Sight* SightConfig;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	UBlackboardComponent* BlackboardComp;
+
 	UFUNCTION()
 	void OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus);
 
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void BeginPlay() override;
-
-private:
-	void MoveToRandomLocation();
-
-	FTimerHandle RandomMoveTimer;
-
-	UPROPERTY(EditAnywhere, Category = "AI")
-	float MoveRadius = 1000.0f;
-
-	UPROPERTY()
-	AActor* TargetActor = nullptr;
-
-	bool bIsChasing = false;
-	FTimerHandle ChasingTimer;
-
-	void StartChasingTarget(AActor* Target);
-	void StopChasingTarget();
-	void UpdateChasingTarget();
 
 };

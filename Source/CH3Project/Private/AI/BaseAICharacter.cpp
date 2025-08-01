@@ -11,7 +11,7 @@ ABaseAICharacter::ABaseAICharacter()
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	Movement->MaxWalkSpeed = WalkSpeed;	
 	Movement->bOrientRotationToMovement = true;
-	Movement->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
+	Movement->RotationRate = FRotator(0.0f, 30.0f, 0.0f);
 }
 
 void ABaseAICharacter::BeginPlay()
@@ -30,5 +30,3 @@ void ABaseAICharacter::setMoveSpeed(float NewSpeed)
 		UE_LOG(LogTemp, Warning, TEXT("AI Character %s speed set to: %f"), *GetName(), NewSpeed);
 	}
 }
-
-
