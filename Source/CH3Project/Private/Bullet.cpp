@@ -25,6 +25,8 @@ ABullet::ABullet()
 	ProjectileMovement->InitialSpeed = 20000.0f;
 	ProjectileMovement->MaxSpeed = 20000.0f;
 
+	ProjectileMovement->ProjectileGravityScale = 0.0f;
+	
 	Damage = DefaultDamage;
 	
 }

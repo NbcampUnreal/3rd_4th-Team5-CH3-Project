@@ -2,38 +2,102 @@
 
 
 #include "TestCharacter.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Components/InputComponent.h"
+#include "Weapon/Weapon.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
-// Sets default values
+
+
 ATestCharacter::ATestCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	SpringArm->SetupAttachment(RootComponent);
+	SpringArm->TargetArmLength = 300.0f;
+	SpringArm->bUsePawnControlRotation = true;
+
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(SpringArm);
+	Camera->bUsePawnControlRotation = false;
+
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
+	
 }
 
-// Called when the game starts or when spawned
 void ATestCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-// Called every frame
 void ATestCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-// Called to bind functionality to input
-void ATestCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+//오버랩 시 플레이어 캐릭터의 손 소켓에 무기 부착
+void ATestCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	if (!WeaponToEquip || CurrentWeapon) return;
 
+	CurrentWeapon = WeaponToEquip;
+
+	if (GetMesh())
+	{
+		WeaponToEquip->AttachToComponent(
+			GetMesh(),
+			
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			TEXT("RightHandSocket")  // 에디터에서 지정한 소켓 이름, 스켈레탈 메쉬마다 반드시 추가 필요
+		);
+
+		WeaponToEquip->SetActorRelativeRotation(FRotator(80.f, 150.f, 30.f)); //애니메이션 미 적용 상태 반영본으로 추후 수정, 혹은 삭제 가능
+		WeaponToEquip->SetActorRelativeScale3D(FVector(0.5f)); // 습득한 무기의 크기를 조절하는 파트
+		
+		WeaponToEquip->SetOwner(this);
+	}
 }
+
+
+void ATestCharacter::FireWeapon()
+{
+
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->Fire();
+	}
+}
+
+void ATestCharacter::StopFireWeapon()
+{
+
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->StopFire();
+	}
+}
+
+
+
 
 //이걸 추후에 캐릭터에 작성해주세요
 FVector ATestCharacter::GetAimTargetLocation() const
 {
 	return GetActorLocation() + GetActorForwardVector() * 10000.0f; // 기본적으로 정면으로 10,000 유닛
 }
+
+void ATestCharacter::OnReload()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->Reload();
+	}
+}
+

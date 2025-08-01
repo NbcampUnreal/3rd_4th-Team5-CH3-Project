@@ -6,7 +6,6 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Bullet.h"
-#include "GameFramework/Character.h"
 #include "GameFramework/PlayerController.h"
 #include "TestCharacter.h" //추후 베이스 캐릭터로 수정 필요
 
@@ -53,6 +52,8 @@ void AWeapon::Tick(float DeltaTime)
 // StartFire 함수는 무기가 발사될 때 호출되어 발사를 시작합니다.
 void AWeapon::StartFire()
 {
+	UE_LOG(LogTemp, Warning, TEXT("FireWeapon called"));
+
 	if (FireMode == EFireMode::SemiAuto)
 	{
 		HandleFire();
@@ -66,6 +67,8 @@ void AWeapon::StartFire()
 // StopFire 함수는 무기가 발사 중일 때 호출되어 발사를 중지합니다.
 void AWeapon::StopFire()
 {
+	UE_LOG(LogTemp, Warning, TEXT("StopFireWeapon called"));
+
 	if (FireMode == EFireMode::FullAuto)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(AutoFireHandle); 
@@ -75,8 +78,10 @@ void AWeapon::StopFire()
 // HandleFire 함수는 무기가 발사될 때 호출됩니다.
 void AWeapon::HandleFire()
 {
+
 	if (bIsReloading || CurrentAmmo <= 0)
 	{
+
 		if (CurrentAmmo <= 0)
 		{
 			Reload();
@@ -85,32 +90,39 @@ void AWeapon::HandleFire()
 	}
 
 	CurrentAmmo--;
-
+	
 	FVector SpawnLocation = MuzzleOffset->GetComponentLocation();
 	FRotator SpawnRotation = MuzzleOffset->GetComponentRotation();
+
 
 	// 베이스 캐릭터를 바탕으로, 플레이어 캐릭터, AI 캐릭터에 적용할 수 있는 확장성 확보
 	if (ATestCharacter* OwnerCharacter = Cast<ATestCharacter>(GetOwner())) 
 	{
 		FVector AimTarget = OwnerCharacter->GetAimTargetLocation(); //GetAimTargetLocation 함수를 캐릭터 쪽에서 구현해줘야 함. 현재 미구동.
+
 		SpawnRotation = UKismetMathLibrary::FindLookAtRotation(SpawnLocation, AimTarget);
 	}
-
+	
 	if (BulletActor)
 	{
 		FActorSpawnParameters Params;
 		Params.Owner = GetOwner();
-		GetWorld()->SpawnActor<ABullet>(BulletActor, SpawnLocation, SpawnRotation, Params);
-	}
+		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(BulletActor, SpawnLocation, SpawnRotation, Params);
+	}	
 }
 
 // 재장전 상태를 확인하고, 현재 탄약이 최대치가 아니면 재장전을 시작합니다.
 void AWeapon::Reload()
 {
-	if (bIsReloading || CurrentAmmo == MaxAmmo) return;
+	UE_LOG(LogTemp, Warning, TEXT("리로드 중"));
 
+	if (bIsReloading || CurrentAmmo == MaxAmmo)
+	{
+		return;
+	}
 	bIsReloading = true;
-	GetWorld()->GetTimerManager().SetTimer(AutoFireHandle, this, &AWeapon::FinishReload, ReloadTime, false);
+	GetWorld()->GetTimerManager().SetTimer(ReloadHandle, this, &AWeapon::FinishReload, ReloadTime, false);
 }
 
 // 재장전이 완료되면 현재 탄약을 최대치로 설정하고 재장전 상태를 해제합니다.
@@ -118,19 +130,21 @@ void AWeapon::FinishReload()
 {
 	CurrentAmmo = MaxAmmo;
 	bIsReloading = false;
+	UE_LOG(LogTemp, Warning, TEXT("리로드 완료됨. 현재 탄약: %d"), CurrentAmmo);
+
 }
 
 //오버랩 시 캐릭터의 무기 소켓에 무기를 붙이고, 소유자를 캐릭터로 설정합니다.
 void AWeapon::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	
 	ATestCharacter* Character = Cast<ATestCharacter>(OtherActor); //테스트 캐릭터를 추후 수정해야함.
-	if (Character)
-	{
-		AttachToComponent(Character->GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, FName("WeaponSocket"));
-		SetOwner(Character);
-		PickupTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
+
+	if (!Character || Character->GetCurrentWeapon()) return;
+
+	Character->EquipWeapon(this);
+	PickupTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // 최대 탄약량을 설정하고 현재 탄약량을 최대치로 초기화합니다.
@@ -156,4 +170,9 @@ void AWeapon::SetFireMode(EFireMode Mode)
 void AWeapon::SetBullet(TSubclassOf<ABullet> Bullet)
 {
 	BulletActor = Bullet;
+}
+
+void AWeapon::Fire()
+{
+	StartFire(); //StartFire를 호출합니다
 }

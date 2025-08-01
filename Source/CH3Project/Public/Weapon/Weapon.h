@@ -61,16 +61,17 @@ protected:
 	bool bIsReloading = false; // 사격 중 재장전 여부
 
 	FTimerHandle AutoFireHandle;
+	FTimerHandle ReloadHandle;
 
 public:	
 	virtual void Tick(float DeltaTime) override; 
 
 	void StartFire(); // 사격 시작
 	void StopFire();
-	virtual void HandleFire(); // 사격 처리 함수, 자식 클래스에서 오버라이드 가능
+	void HandleFire(); // 사격 처리 함수, 자식 클래스에서 오버라이드 가능
 
-	void Reload(); // 재장전 시작 함수, 자식 클래스에서 오버라이드 가능
-	void FinishReload(); // 재장전 완료 처리 함수
+	virtual void Reload(); // 재장전 시작 함수, 자식 클래스에서 오버라이드 가능
+	virtual void FinishReload(); // 재장전 완료 처리 함수
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, // 오버랩을 통돌 충돌 처리
@@ -80,5 +81,8 @@ public:
 	void SetReloadTime(float Time); // 재장전 시간 설정 함수
 	void SetFireMode(EFireMode Mode); // 사격 모드 설정 함수
 	void SetBullet(TSubclassOf<ABullet> Bullet); // 총알 설정 함수
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void Fire();
 };
 

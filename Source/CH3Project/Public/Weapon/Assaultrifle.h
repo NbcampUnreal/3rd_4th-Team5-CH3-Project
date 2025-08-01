@@ -16,4 +16,6 @@ class CH3PROJECT_API AAssaultrifle : public AWeapon
 
 public:
 	AAssaultrifle();
+	
+	
 };
