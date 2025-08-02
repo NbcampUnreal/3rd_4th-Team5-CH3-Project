@@ -14,4 +14,8 @@ class CH3PROJECT_API AMainMenuGameMode : public AGameMode
 {
 	GENERATED_BODY()
 	
+public:
+	// 생성자를 기본 형태로 선언합니다.
+	AMainMenuGameMode();
 };
+
