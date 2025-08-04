@@ -12,6 +12,7 @@
 #include "TestCharacter.generated.h"
 
 
+class AWeapon;
 
 UCLASS()
 class CH3PROJECT_API ATestCharacter : public ACharacter
@@ -34,6 +35,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<AWeapon> CurrentWeapon;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon") //AI, 캐릭터에서 스폰 시 자동으로 얻을 수 있는 무기를 선택하기 위함
+	TSubclassOf<AWeapon> WeaponClass;
+
 	//인핸스드 인풋 시스템으로 Fire, Move, Look 시스템의 테스트용 코드임.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	class UInputMappingContext* DefaultMappingContext;
@@ -43,6 +47,9 @@ protected:
 	UInputAction* MoveAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* LookAction;
+
+
+	void AutoEquipWeapon();
 
 
 public:	

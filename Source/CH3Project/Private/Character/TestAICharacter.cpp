@@ -4,30 +4,20 @@
 #include "Character/TestAICharacter.h"
 
 
-
-void ATestAICharacter::BeginPlay()
+ATestAICharacter::ATestAICharacter()
 {
-	Super::BeginPlay();
-
-	if (WeaponClass)
+	if (WeaponClass == nullptr)
 	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		AWeapon* SpawnedWeapon = GetWorld()->SpawnActor<AWeapon>(
-			WeaponClass,
-			GetActorLocation(), //캐릭터 근처에 스폰
-			GetActorRotation(), //회전은 캐릭터 기준
-			SpawnParams
-		);
-
-		if (SpawnedWeapon)
+		static ConstructorHelpers::FClassFinder<AWeapon> WeaponBP(TEXT("/Game/Blueprints/BP_Rifle"));
+		if (WeaponBP.Succeeded())
 		{
-			EquipWeapon(SpawnedWeapon);  // 부모 클래스 함수 그대로 사용
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("Weapon spawn failed"));
+			WeaponClass = WeaponBP.Class;
 		}
 	}
 }
+
+	void ATestAICharacter::BeginPlay()
+	{
+		Super::BeginPlay();
+		// 무기 스폰은 부모가 처리하므로 추가 코드 불필요
+	}

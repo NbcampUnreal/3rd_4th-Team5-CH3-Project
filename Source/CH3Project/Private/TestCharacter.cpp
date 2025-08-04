@@ -34,6 +34,7 @@ void ATestCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	AutoEquipWeapon();
 }
 
 void ATestCharacter::Tick(float DeltaTime)
@@ -91,7 +92,7 @@ void ATestCharacter::StopFireWeapon()
 FVector ATestCharacter::GetAimTargetLocation() const
 {
 	return GetActorLocation() + GetActorForwardVector() * 10000.0f; // 기본적으로 정면으로 10,000 유닛
-}
+} //탑뷰 형식으로 구현하려면 방향을 마우스 방향으로 수정 필요
 
 void ATestCharacter::OnReload()
 {
@@ -101,3 +102,28 @@ void ATestCharacter::OnReload()
 	}
 }
 
+//스폰 시 자동 장착할 무기 선택 함수 AI, 캐릭터
+void ATestCharacter::AutoEquipWeapon()
+{
+	if (WeaponClass)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		AWeapon* SpawnedWeapon = GetWorld()->SpawnActor<AWeapon>(
+			WeaponClass,
+			GetActorLocation(),
+			GetActorRotation(),
+			SpawnParams
+		);
+
+		if (SpawnedWeapon)
+		{
+			EquipWeapon(SpawnedWeapon);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Weapon spawn failed"));
+		}
+	}
+}
