@@ -49,7 +49,7 @@ void ABullet::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherA
 	if (OtherActor && OtherActor != this && OtherComponent)
 	{
 		UGameplayStatics::ApplyDamage(OtherActor, Damage, GetInstigatorController(), this, nullptr);
-	}
+	} //TakeDamage(); 함수를 캐릭터 파트에 구현 필요
 
 	Destroy();
 }

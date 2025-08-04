@@ -92,7 +92,7 @@ void ATestCharacter::StopFireWeapon()
 FVector ATestCharacter::GetAimTargetLocation() const
 {
 	return GetActorLocation() + GetActorForwardVector() * 10000.0f; // 기본적으로 정면으로 10,000 유닛
-} //탑뷰 형식으로 구현하려면 방향을 마우스 방향으로 수정 필요
+} //탑뷰 형식으로 구현할 시 반드시 수정 필요, 캐릭터가 바라보는 정면으로 사격됨
 
 void ATestCharacter::OnReload()
 {

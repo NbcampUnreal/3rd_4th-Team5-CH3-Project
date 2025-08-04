@@ -6,8 +6,10 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Bullet.h"
-#include "GameFramework/PlayerController.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "TestCharacter.h" //추후 베이스 캐릭터로 수정 필요
+#include "Kismet/GameplayStatics.h"
 
 AWeapon::AWeapon()
 {
@@ -109,6 +111,8 @@ void AWeapon::HandleFire()
 		Params.Owner = GetOwner();
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		ABullet* Bullet = GetWorld()->SpawnActor<ABullet>(BulletActor, SpawnLocation, SpawnRotation, Params);
+
+		PlayFireEffects();
 	}	
 }
 
@@ -176,3 +180,33 @@ void AWeapon::Fire()
 {
 	StartFire(); //StartFire를 호출합니다
 }
+
+void AWeapon::PlayFireEffects()
+{
+	//  사운드 재생
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			FireSound,
+			MuzzleOffset->GetComponentLocation(),
+			1.0f,
+			1.0f,
+			0.0f,
+			FireSoundAttenuation
+		);
+	}
+
+	//  총구 플래시 이펙트 재생
+	if (MuzzleFlashEffect)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			MuzzleFlashEffect,
+			MuzzleOffset->GetComponentLocation(),
+			MuzzleOffset->GetComponentRotation()
+		);
+	}
+}
+
+

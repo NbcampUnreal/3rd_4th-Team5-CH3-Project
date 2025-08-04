@@ -60,10 +60,14 @@ public:
 
 	void FireWeapon();
 	void StopFireWeapon();
+	
 	virtual FVector GetAimTargetLocation() const;
 
 	UFUNCTION()
 	void OnReload();
+
+private:
+	bool bIsFiring = false;
 
 
 };
