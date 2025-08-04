@@ -18,8 +18,8 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	FBlackboardKeySelector BoolKey;
+	FBlackboardKeySelector KeyToSet;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	bool BoolValue;
+	bool bValueSet;
 };

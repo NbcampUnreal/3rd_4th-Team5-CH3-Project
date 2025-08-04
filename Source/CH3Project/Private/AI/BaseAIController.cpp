@@ -72,9 +72,9 @@ void ABaseAIController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 	else
 	{
 		DrawDebugString(GetWorld(), Actor->GetActorLocation() + FVector(0, 0, 100), FString::Printf(TEXT("Lost: %s"), *Actor->GetName()), nullptr, FColor::Red, 2.0f, true);
-		bool bIsCurrentlyChasing = GetBlackboardComponent()->GetValueAsBool(TEXT("IsChasing"));
+		bool bIsCurrentlySearching = GetBlackboardComponent()->GetValueAsBool(TEXT("IsSearching"));
 
-		if (!bIsCurrentlyChasing)
+		if (!bIsCurrentlySearching)
 		{
 			GetBlackboardComponent()->SetValueAsVector(TEXT("LastKnownLocation"), Stimulus.StimulusLocation);
 			GetBlackboardComponent()->ClearValue(TEXT("TargetActor"));

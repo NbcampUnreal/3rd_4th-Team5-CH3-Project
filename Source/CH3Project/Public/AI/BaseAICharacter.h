@@ -18,9 +18,12 @@ public:
 	float RunSpeed = 600.0f;
 
 	void setMoveSpeed(float NewSpeed);
+	void PerformMeleeAttack();
+	void PerformRangedAttack();
 
 protected:
 	virtual void BeginPlay() override;
 
+	class UAIHealthComponent* HealthComponent;
 
 };

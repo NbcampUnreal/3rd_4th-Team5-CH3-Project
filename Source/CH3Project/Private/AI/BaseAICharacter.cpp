@@ -1,5 +1,6 @@
 #include "AI/BaseAICharacter.h"
 #include "AI/BaseAIController.h"
+#include "AI/AIHealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"	
 
 
@@ -11,7 +12,9 @@ ABaseAICharacter::ABaseAICharacter()
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	Movement->MaxWalkSpeed = WalkSpeed;	
 	Movement->bOrientRotationToMovement = true;
-	Movement->RotationRate = FRotator(0.0f, 30.0f, 0.0f);
+	Movement->RotationRate = FRotator(0.0f, 360.0f, 0.0f);
+
+	HealthComponent = CreateDefaultSubobject<UAIHealthComponent>(TEXT("HealthComponent"));
 }
 
 void ABaseAICharacter::BeginPlay()
@@ -29,4 +32,14 @@ void ABaseAICharacter::setMoveSpeed(float NewSpeed)
 		Movement->MaxWalkSpeed = NewSpeed;
 		UE_LOG(LogTemp, Warning, TEXT("AI Character %s speed set to: %f"), *GetName(), NewSpeed);
 	}
+}
+
+void ABaseAICharacter::PerformMeleeAttack()
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s Performs MELEE ATTACK!"), *GetName());
+}
+
+void ABaseAICharacter::PerformRangedAttack()
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s Performs RANGED ATTACK!"), *GetName());
 }

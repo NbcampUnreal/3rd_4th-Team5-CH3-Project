@@ -13,6 +13,6 @@ EBTNodeResult::Type UBTTask_SetBBvalueAsBool::ExecuteTask(UBehaviorTreeComponent
 	{
 		return EBTNodeResult::Failed;
 	}
-	BlackboardComp->SetValueAsBool(BoolKey.SelectedKeyName, BoolValue);
+	BlackboardComp->SetValueAsBool(KeyToSet.SelectedKeyName, bValueSet);
 	return EBTNodeResult::Succeeded;
 }
