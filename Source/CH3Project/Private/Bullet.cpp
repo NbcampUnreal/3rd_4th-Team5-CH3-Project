@@ -4,52 +4,52 @@
 #include "Bullet.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "TestCharacter.h" // Ä³¸¯ÅÍ ÆÄÀÏ¸íÀ¸·Î º¯°æ ÇÊ¿ä
+
+
 
 ABullet::ABullet()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
+	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
 	RootComponent = StaticMesh;
 
-	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
+	StaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly); // ì˜¤ë²„ëž©ë§Œ ê°ì§€
+	StaticMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	StaticMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	StaticMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); // ìºë¦­í„°ì—ë§Œ ë°˜ì‘
+
+	StaticMesh->SetGenerateOverlapEvents(true);
+	
+	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovement");
 	ProjectileMovement->InitialSpeed = 20000.0f;
 	ProjectileMovement->MaxSpeed = 20000.0f;
 
+	ProjectileMovement->ProjectileGravityScale = 0.0f;
+	
+	Damage = DefaultDamage;
+	
 }
 
 void ABullet::BeginPlay()
 {
 	Super::BeginPlay();
-	//StaticMesh->OnComponentHit.AddDynamic(this, &ABullet::OnHit);
-
+	StaticMesh->OnComponentBeginOverlap.AddDynamic(this, &ABullet::OnOverlap);
 }
+
 
 void ABullet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
-void ABullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit) //Ãæµ¹ ½Ã ½ÇÇàµÇ´Â ÇÔ¼ö
+void ABullet::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	ATestCharacter* HitCharacter = Cast<ATestCharacter>(OtherActor); // Ä³¸¯ÅÍ ÆÄÀÏ¸íÀ¸·Î º¯°æ ÇÊ¿ä
-	AActor* Actor = GetOwner();
-	if (!IsValid(Actor))
+	if (OtherActor && OtherActor != this && OtherComponent)
 	{
-		return;
-	}
-	ATestCharacter* BulletHit = Cast<ATestCharacter>(Actor->GetOwner()); // Ä³¸¯ÅÍ ÆÄÀÏ¸íÀ¸·Î º¯°æ ÇÊ¿ä		
-	if (!IsValid(BulletHit))
-	{
-		return;
+		UGameplayStatics::ApplyDamage(OtherActor, Damage, GetInstigatorController(), this, nullptr);
+	} //TakeDamage(); í•¨ìˆ˜ë¥¼ ìºë¦­í„° íŒŒíŠ¸ì— êµ¬í˜„ í•„ìš”
 
-	}
-	//if (HitCharacter && BulletHit)
-	//{
-		//->HitCharacter(BulletHit->Strength, BulletHit); // ÃßÈÄ Ä³¸¯ÅÍ º¯¼ö·Î ¼öÁ¤ ÇÊ¿ä
-
-		//Destroy();
-	//}
+	Destroy();
 }

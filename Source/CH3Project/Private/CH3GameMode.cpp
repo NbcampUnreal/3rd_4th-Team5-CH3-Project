@@ -1,41 +1,53 @@
 //#include "CH3GameMode.h"
+//#include "CH3GameState.h"
 //#include "Kismet/GameplayStatics.h"
-//#include "GameFramework/PlayerController.h"
 //#include "TimerManager.h"
 //
 //ACH3GameMode::ACH3GameMode()
 //{
-//    PlayerScore = 0;
+//    GameStateClass = ACH3GameState::StaticClass();
 //}
 //
 //void ACH3GameMode::BeginPlay()
 //{
 //    Super::BeginPlay();
-//    StartGame();
+//
+//    // 1초마다 TickCountdown 실행
+//    GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &ACH3GameMode::TickTime, 1.0f, true);
 //}
 //
-//void ACH3GameMode::StartGame()
+//void ACH3GameMode::TickTime()
 //{
-//    // 제한 시간 타이머 시작
-//    GetWorldTimerManager().SetTimer(TimerHandle_GameOver, this, &ACH3GameMode::EndGame, GameDuration, false);
-//}
-//
-//void ACH3GameMode::EndGame(bool bPlayerDead)
-//{
-//    FString EndReason = bPlayerDead ? TEXT("플레이어 사망") : TEXT("제한 시간 초과");
-//    UE_LOG(LogTemp, Warning, TEXT("게임 종료: %s"), *EndReason);
-//
-//    APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-//    if (PC)
+//    ACH3GameState* GS = GetGameState<ACH3GameState>();
+//    if (GS && !GS->bIsGameOver)
 //    {
-//        PC->SetPause(true);
-//    }
+//        GS->RemainingTime -= 1.0f;
 //
-//    // 결과 화면 출력 or 메인 메뉴 전환 등 가능
+//        if (GS->RemainingTime <= 0.0f)
+//        {
+//            GameOver();
+//        }
+//    }
 //}
 //
-//void ACH3GameMode::AddScore(int32 Points)
+//void ACH3GameMode::AddScore(int32 Amount)
 //{
-//    PlayerScore += Points;
-//    UE_LOG(LogTemp, Log, TEXT("현재 점수: %d"), PlayerScore);
+//    ACH3GameState* GS = GetGameState<ACH3GameState>();
+//    if (GS)
+//    {
+//        GS->AddScore(Amount);
+//    }
+//}
+//
+//void ACH3GameMode::GameOver()
+//{
+//    ACH3GameState* GS = GetGameState<ACH3GameState>();
+//    if (GS && !GS->bIsGameOver)
+//    {
+//        GS->SetGameOver();
+//
+//        GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+//
+//        // 추가 처리: 입력 차단, UI 띄우기 등
+//    }
 //}
