@@ -9,7 +9,10 @@
 #include "Weapon/Weapon.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputTriggers.h"
+<<<<<<< HEAD
 #include "Item/ItemWeapon.h"
+=======
+>>>>>>> origin/Gamemode
 #include "TestCharacter.generated.h"
 
 
@@ -36,9 +39,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<AWeapon> CurrentWeapon;
 
+<<<<<<< HEAD
 
 
 	
+=======
+>>>>>>> origin/Gamemode
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon") //AI, 캐릭터에서 스폰 시 자동으로 얻을 수 있는 무기를 선택하기 위함
 	TSubclassOf<AWeapon> WeaponClass;
 
@@ -53,6 +59,7 @@ protected:
 	UInputAction* LookAction;
 
 
+<<<<<<< HEAD
 	//인벤토리 스크롤 기능 테스트 중
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* ScrollAction;
@@ -70,11 +77,16 @@ protected:
 	FName WeaponAttachSocketName = "RightHandSocket";
 
 
+=======
+	void AutoEquipWeapon();
+
+>>>>>>> origin/Gamemode
 
 public:	
 	virtual void Tick(float DeltaTime) override;
 
 	FORCEINLINE AWeapon* GetCurrentWeapon() const { return CurrentWeapon; }
+<<<<<<< HEAD
 	
 
 	//인벤토리 기능 테스트 중입니다.
@@ -94,6 +106,10 @@ public:
 
 	
 	
+=======
+	virtual void EquipWeapon(AWeapon* WeaponToEquip);
+
+>>>>>>> origin/Gamemode
 	void FireWeapon();
 	void StopFireWeapon();
 	

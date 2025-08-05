@@ -1,9 +1,13 @@
 #include "AI/BaseAICharacter.h"
 #include "AI/BaseAIController.h"
 #include "AI/AIHealthComponent.h"
+<<<<<<< HEAD
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "BrainComponent.h"
+=======
+#include "GameFramework/CharacterMovementComponent.h"	
+>>>>>>> origin/Gamemode
 
 
 ABaseAICharacter::ABaseAICharacter()
@@ -45,6 +49,7 @@ void ABaseAICharacter::PerformRangedAttack()
 {
 	UE_LOG(LogTemp, Warning, TEXT("%s Performs RANGED ATTACK!"), *GetName());
 }
+<<<<<<< HEAD
 
 void ABaseAICharacter::HandleDeath()
 {
@@ -60,3 +65,5 @@ void ABaseAICharacter::HandleDeath()
 
 	SetLifeSpan(10.0f); 
 }
+=======
+>>>>>>> origin/Gamemode

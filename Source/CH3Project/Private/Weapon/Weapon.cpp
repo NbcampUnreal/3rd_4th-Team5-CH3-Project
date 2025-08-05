@@ -143,12 +143,21 @@ void AWeapon::FinishReload()
 void AWeapon::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+<<<<<<< HEAD
 	ATestCharacter* Character = Cast<ATestCharacter>(OtherActor);
 	if (!Character)
 		return;
 
 	Character->AddWeaponToInventory(this);
 
+=======
+	
+	ATestCharacter* Character = Cast<ATestCharacter>(OtherActor); //테스트 캐릭터를 추후 수정해야함.
+
+	if (!Character || Character->GetCurrentWeapon()) return;
+
+	Character->EquipWeapon(this);
+>>>>>>> origin/Gamemode
 	PickupTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 

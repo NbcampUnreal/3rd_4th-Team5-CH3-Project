@@ -12,26 +12,16 @@
 //public:
 //    ACH3GameMode();
 //
+//protected:
 //    virtual void BeginPlay() override;
 //
-//    // 게임 시작
-//    UFUNCTION(BlueprintCallable)
-//    void StartGame();
-//
-//    // 게임 종료
-//    UFUNCTION(BlueprintCallable)
-//    void EndGame(bool bPlayerDead);
-//
-//    // 점수 추가
-//    UFUNCTION(BlueprintCallable)
-//    void AddScore(int32 Points);
-//
-//protected:
-//    UPROPERTY(EditDefaultsOnly, Category = "Gameplay")
-//    float GameDuration = 180.f; // 3분 제한 시간
-//
-//    FTimerHandle TimerHandle_GameOver;
-//
 //private:
-//    int32 PlayerScore;
+//    FTimerHandle TimerHandle;
+//
+//    UFUNCTION(BlueprintCallable, Category = "test")
+//    void TickTime();
+//
+//public:
+//    void AddScore(int32 Amount);
+//    void GameOver();
 //};
