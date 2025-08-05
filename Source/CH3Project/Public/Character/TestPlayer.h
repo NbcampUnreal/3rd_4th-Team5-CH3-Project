@@ -24,7 +24,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> ReloadAction;
-	
+
 	
 	// 입력 처리 함수
 	void Move(const struct FInputActionValue& Value);
