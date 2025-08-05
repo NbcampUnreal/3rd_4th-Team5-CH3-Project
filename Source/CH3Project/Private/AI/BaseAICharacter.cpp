@@ -1,7 +1,9 @@
 #include "AI/BaseAICharacter.h"
 #include "AI/BaseAIController.h"
 #include "AI/AIHealthComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"	
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "BrainComponent.h"
 
 
 ABaseAICharacter::ABaseAICharacter()
@@ -42,4 +44,19 @@ void ABaseAICharacter::PerformMeleeAttack()
 void ABaseAICharacter::PerformRangedAttack()
 {
 	UE_LOG(LogTemp, Warning, TEXT("%s Performs RANGED ATTACK!"), *GetName());
+}
+
+void ABaseAICharacter::HandleDeath()
+{
+	AAIController* AIController = Cast<AAIController>(GetController());
+	if (AIController && AIController->GetBrainComponent())
+	{
+		AIController->GetBrainComponent()->StopLogic(TEXT("Death"));
+	}
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
+	GetMesh()->SetSimulatePhysics(true);
+
+	SetLifeSpan(10.0f); 
 }
