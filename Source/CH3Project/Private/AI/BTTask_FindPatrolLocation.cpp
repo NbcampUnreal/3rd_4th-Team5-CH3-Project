@@ -1,7 +1,7 @@
 #include "AI/BTTask_FindPatrolLocation.h"
-#include "NavigationSystem.h"
-#include "AIController.h"
+#include "AI/BaseAIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "NavigationSystem.h"
 
 UBTTask_FindPatrolLocation::UBTTask_FindPatrolLocation()
 {
@@ -10,21 +10,20 @@ UBTTask_FindPatrolLocation::UBTTask_FindPatrolLocation()
 
 EBTNodeResult::Type UBTTask_FindPatrolLocation::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	AAIController* AIController = OwnerComp.GetAIOwner();
-	APawn* AIPawn = AIController ? AIController->GetPawn() : nullptr;
-	if (AIController == nullptr || AIController->GetPawn() == nullptr)
+	ABaseAIController* AIController = Cast<ABaseAIController>(OwnerComp.GetAIOwner());
+	if (AIController == nullptr)
 	{
 		return EBTNodeResult::Failed;
 	}
 
-	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(AIPawn->GetWorld());
+	UNavigationSystemV1* NavSystem = UNavigationSystemV1::GetCurrent(GetWorld());
 	if (NavSystem == nullptr)
 	{
 		return EBTNodeResult::Failed;
 	}	
 
 	FNavLocation RandomLocation;
-	if(NavSystem->GetRandomPointInNavigableRadius(AIPawn->GetActorLocation(), SearchRadius, RandomLocation, nullptr))
+	if(NavSystem->GetRandomPointInNavigableRadius(AIController->PatrolCenter, SearchRadius, RandomLocation, nullptr))
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsVector(PatrolLocationKey.SelectedKeyName, RandomLocation.Location);
 		return EBTNodeResult::Succeeded;
