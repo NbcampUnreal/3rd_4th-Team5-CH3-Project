@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "BaseAICharacter.generated.h"
 
+class AAIWeaponActor;	
+
 UCLASS()
 class CH3PROJECT_API ABaseAICharacter : public ACharacter
 {
@@ -16,19 +18,24 @@ public:
 	float WalkSpeed = 300.0f;
 	UPROPERTY(EditAnywhere, Category = "AI")
 	float RunSpeed = 600.0f;
-<<<<<<< HEAD
+
 	UPROPERTY(EditInstanceOnly,BlueprintReadWrite, Category = "AI")
 	FVector PatrolCenter;
-=======
->>>>>>> origin/Gamemode
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TSubclassOf<AAIWeaponActor> WeaponClass;
+	
+	UPROPERTY()
+	AAIWeaponActor* CurrentWeapon;
+
 
 	void setMoveSpeed(float NewSpeed);
 	void PerformMeleeAttack();
 	void PerformRangedAttack();
-<<<<<<< HEAD
+
 	void HandleDeath();
-=======
->>>>>>> origin/Gamemode
+
 
 protected:
 	virtual void BeginPlay() override;
