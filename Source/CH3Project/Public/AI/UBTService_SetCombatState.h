@@ -1,12 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/Services/BTService_BlueprintBase.h"
+#include "BehaviorTree/BTService.h"
 #include "UBTService_SetCombatState.generated.h"
 
 
 UCLASS()
-class CH3PROJECT_API UUBTService_SetCombatState : public UBTService_BlueprintBase
+class CH3PROJECT_API UUBTService_SetCombatState : public UBTService
 {
 	GENERATED_BODY()
 
