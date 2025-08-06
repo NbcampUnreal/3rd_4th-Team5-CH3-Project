@@ -8,7 +8,7 @@
 #include "Bullet.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
-#include "TestCharacter.h" //추후 베이스 캐릭터로 수정 필요
+#include "Character/CH3Character.h" 
 #include "Kismet/GameplayStatics.h"
 
 AWeapon::AWeapon()
@@ -99,12 +99,13 @@ void AWeapon::HandleFire()
 
 
 	// 베이스 캐릭터를 바탕으로, 플레이어 캐릭터, AI 캐릭터에 적용할 수 있는 확장성 확보
-	if (ATestCharacter* OwnerCharacter = Cast<ATestCharacter>(GetOwner()))  //여기의 테스트 캐릭터는 추후 베이스캐릭터로 수정 필요
-	{
-		FVector AimTarget = OwnerCharacter->GetAimTargetLocation(); //GetAimTargetLocation 함수를 캐릭터 쪽에서 구현해줘야 함. 현재 미구동.
 
-		SpawnRotation = UKismetMathLibrary::FindLookAtRotation(SpawnLocation, AimTarget);
-	}
+	//if (ACH3Character* OwnerCharacter = Cast<ACH3Character>(GetOwner()))
+	//{
+	//	FVector AimTarget = OwnerCharacter->GetAimTargetLocation(); //GetAimTargetLocation 함수를 캐릭터 쪽에서 구현해줘야 함. 현재 미구동. // 성빈 : 확인했음
+
+	//	SpawnRotation = UKismetMathLibrary::FindLookAtRotation(SpawnLocation, AimTarget);
+	//}
 	
 	if (BulletActor)
 	{
@@ -143,13 +144,14 @@ void AWeapon::FinishReload()
 void AWeapon::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	ATestCharacter* Character = Cast<ATestCharacter>(OtherActor);
+	ACH3Character* Character = Cast<ACH3Character>(OtherActor); // ACH3Character로 수정
 	if (!Character)
 		return;
 
-	Character->AddWeaponToInventory(this); //추후 캐릭터의 함수에 맞게 수정 필요
 
-	PickupTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Character->EquipWeapon(GetClass()); // 캐릭터의 EquipWeapon 함수를 호출하도록 수정
+
+	PickupTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 오버랩이 발생하면 트리거의 충돌을 비활성화
 }
 
 // 최대 탄약량을 설정하고 현재 탄약량을 최대치로 초기화합니다.
@@ -204,5 +206,3 @@ void AWeapon::PlayFireEffects()
 		);
 	}
 }
-
-

@@ -8,6 +8,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class AWeapon;
 
 struct FInputActionValue;
 
@@ -20,16 +21,29 @@ public:
 	
 	ACH3Character();
 
+	virtual void BeginPlay() override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* SpringArmComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	TSubclassOf<AWeapon> CurrentWeapon; // 현재 장착된 무기의 클래스
+
+	AWeapon* CurrentWeaponInstance; // 현재 장착된 무기의 인스턴스
 
 	void Move(const FInputActionValue& Value);
 	void Equip(const FInputActionValue& Value);
 	void Fire(const FInputActionValue& Value);
-	void Roll(const FInputActionValue& Value);
+	void Dash(const FInputActionValue& Value);
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void EquipWeapon(TSubclassOf<AWeapon> NewWeaponClass);
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
+	float DashSpeed;
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
