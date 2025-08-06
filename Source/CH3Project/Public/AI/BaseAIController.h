@@ -15,6 +15,8 @@ class CH3PROJECT_API ABaseAIController : public AAIController
 
 public:
 	ABaseAIController();
+	
+	FVector PatrolCenter;
 
 	FORCEINLINE UBlackboardComponent* GetBlackboardComponent() const 
 	{ 

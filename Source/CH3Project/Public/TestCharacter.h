@@ -9,6 +9,7 @@
 #include "Weapon/Weapon.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputTriggers.h"
+#include "Item/ItemWeapon.h"
 #include "TestCharacter.generated.h"
 
 
@@ -35,6 +36,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<AWeapon> CurrentWeapon;
 
+
+
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon") //AI, 캐릭터에서 스폰 시 자동으로 얻을 수 있는 무기를 선택하기 위함
 	TSubclassOf<AWeapon> WeaponClass;
 
@@ -49,15 +53,47 @@ protected:
 	UInputAction* LookAction;
 
 
+	//인벤토리 스크롤 기능 테스트 중
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	UInputAction* ScrollAction;
+	
 	void AutoEquipWeapon();
+
+	//인벤토리 테스트 중
+
+	UPROPERTY()
+	TArray<AWeapon*> Inventory;
+
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	FName WeaponAttachSocketName = "RightHandSocket";
+
 
 
 public:	
 	virtual void Tick(float DeltaTime) override;
 
 	FORCEINLINE AWeapon* GetCurrentWeapon() const { return CurrentWeapon; }
-	virtual void EquipWeapon(AWeapon* WeaponToEquip);
+	
 
+	//인벤토리 기능 테스트 중입니다.
+	void AddWeaponToInventory(AWeapon* NewWeapon);
+	void RemoveWeaponFromInventory(AWeapon* WeaponToRemove);
+	void EquipWeapon(AWeapon* WeaponToEquip);
+	void SelectWeaponByIndex(int32 Index);
+	
+	void CycleWeaponUp();     // 휠 업
+	void CycleWeaponDown();   // 휠 다운
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	int32 CurrentWeaponIndex = 0;
+	UFUNCTION()
+	void HandleMouseScroll(const FInputActionValue& Value);
+
+	
+	
 	void FireWeapon();
 	void StopFireWeapon();
 	
