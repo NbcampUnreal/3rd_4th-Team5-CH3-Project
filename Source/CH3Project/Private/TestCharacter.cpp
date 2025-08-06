@@ -173,27 +173,6 @@ void ATestCharacter::HandleMouseScroll(const FInputActionValue& Value)
 //* 여기까지 참고용 코드입니다.
 
 //오버랩 시 플레이어 캐릭터의 손 소켓에 무기 부착
-void ATestCharacter::EquipWeapon(AWeapon* WeaponToEquip)
-{
-	if (!WeaponToEquip || CurrentWeapon) return;
-
-	CurrentWeapon = WeaponToEquip;
-
-	if (GetMesh())
-	{
-		WeaponToEquip->AttachToComponent(
-			GetMesh(),
-			
-			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-			TEXT("RightHandSocket")  // 에디터에서 지정한 소켓 이름, 스켈레탈 메쉬마다 반드시 추가 필요
-		);
-
-		WeaponToEquip->SetActorRelativeRotation(FRotator(80.f, 150.f, 30.f)); //애니메이션 미 적용 상태 반영본으로 추후 수정, 혹은 삭제 가능
-		WeaponToEquip->SetActorRelativeScale3D(FVector(0.5f)); // 습득한 무기의 크기를 조절하는 파트
-		
-		WeaponToEquip->SetOwner(this);
-	}
-}
 
 
 

@@ -48,13 +48,12 @@ void ATestPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		{
 			EnhancedInput->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &ATestCharacter::OnReload);
 		}
-<<<<<<< HEAD
+
 		if (ScrollAction)
 		{
 			EnhancedInput->BindAction(ScrollAction, ETriggerEvent::Triggered, this, &ATestCharacter::HandleMouseScroll);
 		}
-=======
->>>>>>> origin/Gamemode
+
 	}
 }
 
