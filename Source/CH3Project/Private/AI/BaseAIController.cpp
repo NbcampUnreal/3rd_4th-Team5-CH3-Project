@@ -1,8 +1,5 @@
 #include "AI/BaseAIController.h"
-<<<<<<< HEAD
 #include "AI/BaseAICharacter.h"	
-=======
->>>>>>> origin/Gamemode
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Kismet/GameplayStatics.h"
@@ -50,23 +47,20 @@ void ABaseAIController::OnPossess(APawn* InPawn)
 		UE_LOG(LogTemp, Warning, TEXT("AI Controller possessed pawn: %s"), *InPawn->GetName());
 	}
 
-<<<<<<< HEAD
+
 	ABaseAICharacter* AIChar = Cast<ABaseAICharacter>(InPawn);
 	if (AIChar)
 	{
 		PatrolCenter = AIChar->PatrolCenter;
 	}
 	
-=======
->>>>>>> origin/Gamemode
+
 	if (BehaviorTree)
 	{
 		RunBehaviorTree(BehaviorTree);
 	}
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/Gamemode
+
 }
 
 void ABaseAIController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)

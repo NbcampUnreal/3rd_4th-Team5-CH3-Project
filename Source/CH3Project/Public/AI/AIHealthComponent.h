@@ -24,9 +24,6 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
 	float MaxHealth = 100.0f;
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/Gamemode
 	float CurrentHealth;
 };

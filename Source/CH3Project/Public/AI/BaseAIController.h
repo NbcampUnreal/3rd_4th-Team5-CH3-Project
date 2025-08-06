@@ -15,11 +15,10 @@ class CH3PROJECT_API ABaseAIController : public AAIController
 
 public:
 	ABaseAIController();
-<<<<<<< HEAD
+
 	
 	FVector PatrolCenter;
-=======
->>>>>>> origin/Gamemode
+
 
 	FORCEINLINE UBlackboardComponent* GetBlackboardComponent() const 
 	{ 

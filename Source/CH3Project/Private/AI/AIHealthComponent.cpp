@@ -1,8 +1,6 @@
 #include "AI/AIHealthComponent.h"
-<<<<<<< HEAD
 #include "AI/BaseAICharacter.h"	
-=======
->>>>>>> origin/Gamemode
+
 
 
 UAIHealthComponent::UAIHealthComponent()
@@ -35,14 +33,13 @@ void UAIHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage,
 
 	if(CurrentHealth <= 0.0f)
 	{
-<<<<<<< HEAD
+
 		ABaseAICharacter* OwningCharacter = Cast<ABaseAICharacter>(GetOwner());
 		if (OwningCharacter)
 		{
 			OwningCharacter->HandleDeath();
 		}
-=======
->>>>>>> origin/Gamemode
+
 		UE_LOG(LogTemp, Warning, TEXT("%s has died."), *GetOwner()->GetName());
 	}	
 }

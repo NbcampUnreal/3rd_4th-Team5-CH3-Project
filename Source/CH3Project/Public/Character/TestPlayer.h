@@ -24,11 +24,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> ReloadAction;
-<<<<<<< HEAD
 
-=======
-	
->>>>>>> origin/Gamemode
 	
 	// 입력 처리 함수
 	void Move(const struct FInputActionValue& Value);
