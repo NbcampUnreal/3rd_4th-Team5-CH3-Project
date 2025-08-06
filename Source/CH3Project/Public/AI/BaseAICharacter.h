@@ -16,13 +16,19 @@ public:
 	float WalkSpeed = 300.0f;
 	UPROPERTY(EditAnywhere, Category = "AI")
 	float RunSpeed = 600.0f;
+<<<<<<< HEAD
 	UPROPERTY(EditInstanceOnly,BlueprintReadWrite, Category = "AI")
 	FVector PatrolCenter;
+=======
+>>>>>>> origin/Gamemode
 
 	void setMoveSpeed(float NewSpeed);
 	void PerformMeleeAttack();
 	void PerformRangedAttack();
+<<<<<<< HEAD
 	void HandleDeath();
+=======
+>>>>>>> origin/Gamemode
 
 protected:
 	virtual void BeginPlay() override;

@@ -55,6 +55,7 @@ public:
 		const FHitResult& SweepResult
 	);
 
+
 	UFUNCTION()
 	void OnHit(
 		UPrimitiveComponent* HitComponent,
@@ -64,11 +65,13 @@ public:
 		const FHitResult& Hit
 	);
 
+
 	//Bullet 액터의 거리 초과 이후 메모리 삭제를 위한 탄환의 최대 사정거리
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Bullet")
 	float MaxDistance = 10000.0f; //사정거리 수정 시 이 함수를 생성자에 불러와서 수정할 것
 	
 	FVector SpawnLocation;
+
 
 private:
 

@@ -6,6 +6,7 @@
 #include "BrainComponent.h"
 
 
+
 ABaseAICharacter::ABaseAICharacter()
 {
 	AIControllerClass = ABaseAIController::StaticClass();
@@ -45,6 +46,7 @@ void ABaseAICharacter::PerformRangedAttack()
 {
 	UE_LOG(LogTemp, Warning, TEXT("%s Performs RANGED ATTACK!"), *GetName());
 }
+
 
 void ABaseAICharacter::HandleDeath()
 {

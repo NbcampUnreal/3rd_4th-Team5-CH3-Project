@@ -15,7 +15,9 @@ ABullet::ABullet()
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
 	RootComponent = StaticMesh;
 
+
 	// 콜리전 설정: WorldDynamic, 오버랩 이벤트는 받되, 불릿끼리는 충돌 및 오버랩 무시
+
 	StaticMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	StaticMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 
@@ -38,7 +40,9 @@ void ABullet::BeginPlay()
 	Super::BeginPlay();
 
 	StaticMesh->OnComponentBeginOverlap.AddDynamic(this, &ABullet::OnOverlap);
+
 	StaticMesh->OnComponentHit.AddDynamic(this, &ABullet::OnHit);
+
 
 	SpawnLocation = GetActorLocation();
 
@@ -54,6 +58,7 @@ void ABullet::BeginPlay()
 			true
 		);
 	}
+
 
 	// 자기 자신 소유자 무시
 	if (AActor* OwnerActor = GetOwner())
@@ -73,24 +78,35 @@ void ABullet::BeginPlay()
 			StaticMesh->MoveIgnoreActors.Add(Actor);
 		}
 	}
+
 }
 
 
 void ABullet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 	float DistanceTravelled = FVector::Dist(GetActorLocation(), SpawnLocation);
 	if (DistanceTravelled >= MaxDistance)
 	{
 		Destroy(); // 사정거리 초과 시 제거
 	}
+
 }
 
 void ABullet::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+
 	if (!OtherActor || OtherActor == this || !OtherComp)
 		return;
+
+		// 특정 클래스만 데미지 처리
+		if (OtherActor->IsA(APawn::StaticClass()))
+		{
+			UGameplayStatics::ApplyDamage(OtherActor, Damage, GetInstigatorController(), this, nullptr);
+		}
+
 
 	// 불릿끼리 오버랩 무시
 	if (OtherActor->IsA(ABullet::StaticClass()))
@@ -144,3 +160,4 @@ void ABullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 
 	Destroy();
 }
+

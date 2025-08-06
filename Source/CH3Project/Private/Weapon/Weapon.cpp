@@ -144,14 +144,20 @@ void AWeapon::FinishReload()
 void AWeapon::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+
 	ACH3Character* Character = Cast<ACH3Character>(OtherActor); // ACH3Character로 수정
+
+
 	if (!Character)
 		return;
+
 
 
 	Character->EquipWeapon(GetClass()); // 캐릭터의 EquipWeapon 함수를 호출하도록 수정
 
 	PickupTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 오버랩이 발생하면 트리거의 충돌을 비활성화
+
+
 }
 
 // 최대 탄약량을 설정하고 현재 탄약량을 최대치로 초기화합니다.
