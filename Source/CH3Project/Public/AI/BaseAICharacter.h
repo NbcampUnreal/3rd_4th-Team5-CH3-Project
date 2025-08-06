@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "BaseAICharacter.generated.h"
 
+class AAIWeaponActor;	
+
 UCLASS()
 class CH3PROJECT_API ABaseAICharacter : public ACharacter
 {
@@ -18,6 +20,12 @@ public:
 	float RunSpeed = 600.0f;
 	UPROPERTY(EditInstanceOnly,BlueprintReadWrite, Category = "AI")
 	FVector PatrolCenter;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	TSubclassOf<AAIWeaponActor> WeaponClass;
+	
+	UPROPERTY()
+	AAIWeaponActor* CurrentWeapon;
 
 	void setMoveSpeed(float NewSpeed);
 	void PerformMeleeAttack();
