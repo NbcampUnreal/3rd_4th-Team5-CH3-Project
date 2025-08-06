@@ -47,3 +47,12 @@ void ABaseGrenade::Explode()
 
 	Destroy();
 }
+
+void ABaseGrenade::Throw(FVector Direction, float Force)
+{
+	if (MovementComponent)
+	{
+		// 던질 방향으로 속도 설정 (노멀라이즈 보장)
+		MovementComponent->Velocity = Direction.GetSafeNormal() * Force;
+	}
+}

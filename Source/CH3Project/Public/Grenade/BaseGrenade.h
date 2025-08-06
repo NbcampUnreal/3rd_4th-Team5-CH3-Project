@@ -60,4 +60,6 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void Throw(FVector Direction, float Force);
+
 };

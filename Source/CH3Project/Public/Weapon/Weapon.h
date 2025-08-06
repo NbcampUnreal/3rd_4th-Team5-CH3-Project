@@ -70,7 +70,7 @@ public:
 
 	void StartFire(); // 사격 시작
 	void StopFire();
-	void HandleFire(); // 사격 처리 함수, 자식 클래스에서 오버라이드 가능
+	virtual void HandleFire(); // 사격 처리 함수, 자식 클래스에서 오버라이드 가능
 
 	
 
@@ -100,7 +100,5 @@ public:
 
 
 	
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void Fire();
 };
 

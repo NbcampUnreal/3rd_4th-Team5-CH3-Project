@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "Bullet.generated.h"
 
+class UNiagaraSystem;
+class UNiagaraComponent;
+
 UCLASS()
 class CH3PROJECT_API ABullet : public AActor
 {
@@ -14,18 +17,33 @@ class CH3PROJECT_API ABullet : public AActor
 public:	
 	ABullet();
 
+	
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UStaticMeshComponent> StaticMesh;
+	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UProjectileMovementComponent> ProjectileMovement;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Damage")
 	float Damage;
-	
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	UNiagaraSystem* TrailEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	UNiagaraSystem* ImpactEffect;
+
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 
+
+	UPROPERTY()
+	UNiagaraComponent* TrailComponent;
+	
 	//불릿이 Pawn을 상속받는 캐릭터에 오버랩 시 동작하도록 설정
 	UFUNCTION()
 	void OnOverlap(
@@ -37,6 +55,15 @@ public:
 		const FHitResult& SweepResult
 	);
 
+	UFUNCTION()
+	void OnHit(
+		UPrimitiveComponent* HitComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		FVector NormalImpulse,
+		const FHitResult& Hit
+	);
+
 	//Bullet 액터의 거리 초과 이후 메모리 삭제를 위한 탄환의 최대 사정거리
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Bullet")
 	float MaxDistance = 10000.0f; //사정거리 수정 시 이 함수를 생성자에 불러와서 수정할 것
@@ -44,12 +71,11 @@ public:
 	FVector SpawnLocation;
 
 private:
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<class UStaticMeshComponent> StaticMesh;
+
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Bullet")
 	float DefaultDamage = 10.0f;
 
-	
+
 	
 };

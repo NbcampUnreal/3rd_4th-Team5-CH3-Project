@@ -65,6 +65,13 @@ void ATestCharacter::AddWeaponToInventory(AWeapon* NewWeapon)
 		{
 			SelectWeaponByIndex(0); // 첫 무기 장착
 		}
+		
+		UE_LOG(LogTemp, Warning, TEXT("Inventory Count: %d"), Inventory.Num());
+		for (auto Weapon : Inventory)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Weapon: %s"), *Weapon->GetName());
+		}
+		
 	}
 }
 
@@ -84,7 +91,13 @@ void ATestCharacter::RemoveWeaponFromInventory(AWeapon* WeaponToRemove)
 
 void ATestCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 {
-	if (!WeaponToEquip || WeaponToEquip == CurrentWeapon) return;
+	if (!WeaponToEquip || WeaponToEquip == CurrentWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("EquipWeapon aborted: invalid weapon or already equipped"));
+		return;
+	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Equipping weapon: %s"), *WeaponToEquip->GetName());
 
 	// 현재 무기 숨기기
 	if (CurrentWeapon)
@@ -104,6 +117,10 @@ void ATestCharacter::EquipWeapon(AWeapon* WeaponToEquip)
 	// 반드시 보여지도록 처리
 	CurrentWeapon->SetActorHiddenInGame(false);
 	CurrentWeapon->SetActorEnableCollision(true);
+
+	UE_LOG(LogTemp, Warning, TEXT("Weapon equipped successfully: %s"), *CurrentWeapon->GetName());
+
+	
 }
 
 void ATestCharacter::SelectWeaponByIndex(int32 Index)
@@ -137,7 +154,6 @@ void ATestCharacter::CycleWeaponDown()
 void ATestCharacter::HandleMouseScroll(const FInputActionValue& Value)
 {
 	float ScrollDelta = Value.Get<float>();
-
 	if (FMath::IsNearlyZero(ScrollDelta))
 		return;
 
@@ -159,7 +175,7 @@ void ATestCharacter::FireWeapon()
 
 	if (CurrentWeapon)
 	{
-		CurrentWeapon->Fire();
+		CurrentWeapon->StartFire();
 	}
 }
 
@@ -178,7 +194,7 @@ void ATestCharacter::StopFireWeapon()
 //이걸 추후에 캐릭터에 작성해주세요
 FVector ATestCharacter::GetAimTargetLocation() const //함수 내용은 달라도 GetAimTargetLocation 함수명은 고정, 혹은 수정 시 알려주세요
 {
-	return GetActorLocation() + GetActorForwardVector() * 10000.0f; // 기본적으로 정면으로 10,000 유닛
+	return GetActorLocation() + GetActorForwardVector() * 1000.0f; // 기본적으로 정면으로 10,000 유닛
 } //탑뷰 형식으로 구현할 시 반드시 수정 필요, 캐릭터가 바라보는 정면으로 사격됨
 
 void ATestCharacter::OnReload()
@@ -188,6 +204,7 @@ void ATestCharacter::OnReload()
 		CurrentWeapon->Reload();
 	}
 }
+
 
 //스폰 시 자동 장착할 무기 선택 함수 AI, 캐릭터
 void ATestCharacter::AutoEquipWeapon()

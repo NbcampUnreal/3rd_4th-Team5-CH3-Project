@@ -99,7 +99,7 @@ void AWeapon::HandleFire()
 
 
 	// 베이스 캐릭터를 바탕으로, 플레이어 캐릭터, AI 캐릭터에 적용할 수 있는 확장성 확보
-	if (ATestCharacter* OwnerCharacter = Cast<ATestCharacter>(GetOwner())) 
+	if (ATestCharacter* OwnerCharacter = Cast<ATestCharacter>(GetOwner()))  //여기의 테스트 캐릭터는 추후 베이스캐릭터로 수정 필요
 	{
 		FVector AimTarget = OwnerCharacter->GetAimTargetLocation(); //GetAimTargetLocation 함수를 캐릭터 쪽에서 구현해줘야 함. 현재 미구동.
 
@@ -139,7 +139,7 @@ void AWeapon::FinishReload()
 
 }
 
-//오버랩 시 캐릭터의 무기 소켓에 무기를 붙이고, 소유자를 캐릭터로 설정합니다.
+//오버랩 시 캐릭터의 AddWeaponToInventory 함수에 따라 인벤토리 내 저장이 됨.
 void AWeapon::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -147,7 +147,7 @@ void AWeapon::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 	if (!Character)
 		return;
 
-	Character->AddWeaponToInventory(this);
+	Character->AddWeaponToInventory(this); //추후 캐릭터의 함수에 맞게 수정 필요
 
 	PickupTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
@@ -175,11 +175,6 @@ void AWeapon::SetFireMode(EFireMode Mode)
 void AWeapon::SetBullet(TSubclassOf<ABullet> Bullet)
 {
 	BulletActor = Bullet;
-}
-
-void AWeapon::Fire()
-{
-	StartFire(); //StartFire를 호출합니다
 }
 
 void AWeapon::PlayFireEffects()
