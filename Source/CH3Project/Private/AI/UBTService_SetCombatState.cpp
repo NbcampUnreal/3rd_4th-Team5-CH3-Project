@@ -1,7 +1,9 @@
 #include "AI/UBTService_SetCombatState.h"
 #include "AI/BaseAIController.h"
-#include "BehaviorTree/BlackboardComponent.h"
 #include "AI/BaseAICharacter.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Engine/Engine.h"
+#include "AI/AIAttackType.h"
 
 UUBTService_SetCombatState::UUBTService_SetCombatState()
 {
@@ -30,22 +32,23 @@ void UUBTService_SetCombatState::TickNode(UBehaviorTreeComponent& OwnerComp, uin
 	
 	if (AICharacter == nullptr || TargetActor == nullptr)
 	{
-		BlackboardComp->SetValueAsEnum(CombatStateKey.SelectedKeyName, 0); // 0 for Idle state
+		BlackboardComp->SetValueAsEnum(CombatStateKey.SelectedKeyName, (uint8)EAIAttackType::EAT_None); // 0 for Idle state
 		return;
 	}
 
 	float DistanceToTarget = FVector::Dist(AICharacter->GetActorLocation(), TargetActor->GetActorLocation());
 
-	if (DistanceToTarget <= MeleeRange)
+
+	if (DistanceToTarget > RangedRange)
 	{
-		BlackboardComp->SetValueAsEnum(CombatStateKey.SelectedKeyName, 1); // 1 for Melee state
+		BlackboardComp->SetValueAsEnum(CombatStateKey.SelectedKeyName, (uint8)EAIAttackType::EAT_None);// 1 for Melee state
 	}
-	else if (DistanceToTarget <= RangedRange)
+	else if (DistanceToTarget > MeleeRange)
 	{
-		BlackboardComp->SetValueAsEnum(CombatStateKey.SelectedKeyName, 2); // 2 for Ranged state
+		BlackboardComp->SetValueAsEnum(CombatStateKey.SelectedKeyName, (uint8)EAIAttackType::EAT_Ranged); // 2 for Ranged state
 	}
 	else
 	{
-		BlackboardComp->SetValueAsEnum(CombatStateKey.SelectedKeyName, 0); // 0 for Idle state
+		BlackboardComp->SetValueAsEnum(CombatStateKey.SelectedKeyName, (uint8)EAIAttackType::EAT_Melee); // 0 for Idle state
 	}
 }
