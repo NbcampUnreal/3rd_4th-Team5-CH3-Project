@@ -32,6 +32,7 @@ AWeapon::AWeapon()
 	PickupTrigger->SetCollisionResponseToAllChannels(ECR_Ignore);
 	PickupTrigger->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
+	Mesh->SetRelativeRotation(FRotator(20.0f, 220.0f, 0.0f));
 
 }
 
@@ -142,12 +143,12 @@ void AWeapon::FinishReload()
 void AWeapon::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	
-	ATestCharacter* Character = Cast<ATestCharacter>(OtherActor); //테스트 캐릭터를 추후 수정해야함.
+	ATestCharacter* Character = Cast<ATestCharacter>(OtherActor);
+	if (!Character)
+		return;
 
-	if (!Character || Character->GetCurrentWeapon()) return;
+	Character->AddWeaponToInventory(this);
 
-	Character->EquipWeapon(this);
 	PickupTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
