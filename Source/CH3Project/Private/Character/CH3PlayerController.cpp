@@ -7,7 +7,7 @@
 
 ACH3PlayerController::ACH3PlayerController() : DefaultMappingContext(nullptr), MoveAction(nullptr)
 {
-	bShowMouseCursor = true; // ¸¶¿ì½º Ä¿¼­ Ç¥½Ã
+	bShowMouseCursor = true; // ë§ˆìš°ìŠ¤ ì»¤ì„œë¥¼ ë³´ì´ê²Œ ì„¤ì •
 }
 
 void ACH3PlayerController::BeginPlay()
@@ -20,33 +20,44 @@ void ACH3PlayerController::BeginPlay()
 		{
 			if (DefaultMappingContext)
 			{
-				Subsystem->AddMappingContext(DefaultMappingContext, 0); // 0Àº ¿ì¼±¼øÀ§, ³·À»¼ö·Ï ¿ì¼±¼øÀ§°¡ ³ôÀ½
+				Subsystem->AddMappingContext(DefaultMappingContext, 0);
 
 			}
 		}
 	}
 }
 
-void ACH3PlayerController::MouseLook()
+void ACH3PlayerController::MouseLook() // ë§ˆìš°ìŠ¤ ìœ„ì¹˜ë¥¼ ë°”ë¼ë³´ë„ë¡ í”Œë ˆì´ì–´ í°ì„ íšŒì „ì‹œí‚¤ëŠ” í•¨ìˆ˜
 {
-	FHitResult HitResult; // ¸¶¿ì½º Ä¿¼­ À§Ä¡¿¡¼­ È÷Æ® °á°ú¸¦ ÀúÀåÇÒ º¯¼ö
-	GetHitResultUnderCursor(ECC_Visibility, false, HitResult); // ¸¶¿ì½º Ä¿¼­ ¾Æ·¡ÀÇ È÷Æ® °á°ú¸¦ °¡Á®¿È
-	if (HitResult.bBlockingHit) // È÷Æ®°¡ ¹ß»ıÇßÀ» ¶§
+	FHitResult HitResult; // HitResult êµ¬ì¡°ì²´ë¥¼ ì„ ì–¸í•˜ì—¬ ë§ˆìš°ìŠ¤ í´ë¦­ ìœ„ì¹˜ì˜ ì •ë³´ë¥¼ ì €ì¥
+	GetHitResultUnderCursor(ECC_Visibility, false, HitResult); // ë§ˆìš°ìŠ¤ ì»¤ì„œ ì•„ë˜ì˜ ì¶©ëŒ ì •ë³´ë¥¼ HitResultì— ì €ì¥
+	if (HitResult.bBlockingHit) // HitResultê°€ ìœ íš¨í•œì§€ í™•ì¸
 	{
-		APawn* const PlayerPawn = GetPawn(); // ÇöÀç ÇÃ·¹ÀÌ¾îÀÇ PawnÀ» °¡Á®¿È
+		APawn* const PlayerPawn = GetPawn();
 		if (PlayerPawn)
 		{
-			// ÇÃ·¹ÀÌ¾î PawnÀÇ À§Ä¡¿Í È÷Æ® °á°úÀÇ À§Ä¡¸¦ ÀÌ¿ëÇÏ¿© ¹Ù¶óº¸´Â ¹æÇâÀ» °è»ê
-			FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(PlayerPawn->GetActorLocation(), FVector(HitResult.Location.X, HitResult.Location.Y, PlayerPawn->GetActorLocation().Z));
-			PlayerPawn->SetActorRotation(LookAtRotation); // ÇÃ·¹ÀÌ¾î PawnÀÇ È¸ÀüÀ» ¼³Á¤
+			FVector PawnLocation = PlayerPawn->GetActorLocation(); // í˜„ì¬ í”Œë ˆì´ì–´ í°ì˜ ìœ„ì¹˜ë¥¼ ê°€ì ¸ì˜´
+			// íƒ€ê²Ÿ ìœ„ì¹˜ë¥¼ HitResultì˜ ìœ„ì¹˜ë¡œ ì„¤ì •í•˜ë˜, Zì¶•ì€ í”Œë ˆì´ì–´ í°ì˜ Zì¶•ê³¼ ë™ì¼í•˜ê²Œ ì„¤ì •
+			FVector TargetLocation = FVector(HitResult.Location.X, HitResult.Location.Y, PawnLocation.Z); 
+
+			if (!PawnLocation.Equals(TargetLocation, 1.0f)) // í”Œë ˆì´ì–´ í°ì˜ ìœ„ì¹˜ì™€ íƒ€ê²Ÿ ìœ„ì¹˜ê°€ ë‹¤ë¥¼ ë•Œë§Œ íšŒì „
+			{	
+				FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(PawnLocation, TargetLocation); // íƒ€ê²Ÿ ìœ„ì¹˜ë¥¼ ë°”ë¼ë³´ëŠ” íšŒì „ê°’ì„ ê³„ì‚°
+				FRotator CurrentRotation = PlayerPawn->GetActorRotation(); // í˜„ì¬ í”Œë ˆì´ì–´ í°ì˜ íšŒì „ê°’ì„ ê°€ì ¸ì˜´
+
+				if (!CurrentRotation.Equals(LookAtRotation, 0.1f)) // í˜„ì¬ íšŒì „ê°’ê³¼ íƒ€ê²Ÿ íšŒì „ê°’ì´ ë‹¤ë¥¼ ë•Œë§Œ íšŒì „ ì ìš©
+				{
+					PlayerPawn->SetActorRotation(LookAtRotation); // í”Œë ˆì´ì–´ í°ì˜ íšŒì „ê°’ì„ íƒ€ê²Ÿ íšŒì „ê°’ìœ¼ë¡œ ì„¤ì •
+				}
+			}
 		}
 	}
 }
 
-void ACH3PlayerController::PlayerTick(float DeltaTime)
+void ACH3PlayerController::PlayerTick(float DeltaTime) // í”Œë ˆì´ì–´ ì»¨íŠ¸ë¡¤ëŸ¬ì˜ í‹± í•¨ìˆ˜
 {
 	Super::PlayerTick(DeltaTime);
-	// ¸¶¿ì½º Ä¿¼­ À§Ä¡¿¡ µû¶ó ÇÃ·¹ÀÌ¾î°¡ ¹Ù¶óº¸´Â ¹æÇâÀ» Á¶Á¤
-	MouseLook();
+	
+	MouseLook(); // ë§ˆìš°ìŠ¤ ìœ„ì¹˜ë¥¼ ë°”ë¼ë³´ë„ë¡ í”Œë ˆì´ì–´ í°ì„ íšŒì „ì‹œí‚´
 	
 }
