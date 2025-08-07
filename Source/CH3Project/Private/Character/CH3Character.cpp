@@ -6,6 +6,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "Character/CH3PlayerController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Weapon/Weapon.h"
 
 
@@ -20,16 +21,26 @@ ACH3Character::ACH3Character()
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	DashSpeed = 2000.0f; // DashSpeed 초기화
+	LastDashTime = -FLT_MAX; // FLT_MAX는 부동 소수점의 최대값으로 LastDashTime을 -FLT_MAX로 설정함으로써 캐릭터가 게임 시작 시 즉시 대시를 할 수 있도록 합니다.
+	DashCooldown = 1.0f; // 1초 쿨타임
 }
 
 void ACH3Character::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	CurrentWeaponInstance = GetWorld()->SpawnActor<AWeapon>(CurrentWeapon); // CurrentWeapon 클래스를 사용하여 무기 인스턴스를 생성
-	GetMesh()->HideBoneByName(TEXT("weapon_r"),EPhysBodyOp::PBO_None);
-	CurrentWeaponInstance->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("hand_rSocket")); // 무기를 캐릭터의 손에 붙임.
-	CurrentWeaponInstance->SetOwner(this); // 무기의 소유자를 현재 캐릭터로 설정
+
+	CurrentWeaponInstance = GetWorld()->SpawnActor<AWeapon>(CurrentWeapon); // 현재 장착된 무기의 인스턴스를 생성
+	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None); // 무기 뼈대를 숨김
+
+	if (CurrentWeaponInstance) // 무기 인스턴스가 성공적으로 생성되었는지 확인
+	{
+		CurrentWeaponInstance->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("hand_rSocket")); // 무기를 캐릭터의 손에 붙임
+		CurrentWeaponInstance->SetOwner(this); // 무기의 소유자를 현재 캐릭터로 설정
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("무기 스폰에 실패했습니다! CurrentWeapon을 확인하세요.")); // 무기 스폰 실패 시 에러 로그 출력
+	}
 }
 
 void ACH3Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -44,13 +55,11 @@ void ACH3Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 			{
 				EnhancedInputComponent->BindAction(MyController->MoveAction, ETriggerEvent::Triggered, this, &ACH3Character::Move);
 			}
-			if (MyController->EquipAction)
-			{
-				EnhancedInputComponent->BindAction(MyController->EquipAction, ETriggerEvent::Triggered, this, &ACH3Character::Equip);
-			}
 			if (MyController->FireAction)
 			{
-				EnhancedInputComponent->BindAction(MyController->FireAction, ETriggerEvent::Triggered, this, &ACH3Character::Fire);
+				EnhancedInputComponent->BindAction(MyController->FireAction, ETriggerEvent::Started, this, &ACH3Character::Fire); // 단발 모드에서 즉시 발사
+
+				EnhancedInputComponent->BindAction(MyController->FireAction, ETriggerEvent::Completed, this, &ACH3Character::FireReleased); // 연사 모드에서 StopFire를 호출하기 위해 Completed 이벤트도 바인딩
 			}
 			if (MyController->DashAction)
 			{
@@ -69,45 +78,99 @@ void ACH3Character::Move(const FInputActionValue& Value)
 	AddMovementInput(CameraComp->GetForwardVector(), MovementVector.X);
 	AddMovementInput(CameraComp->GetRightVector(), MovementVector.Y);
 }
-
-void ACH3Character::Equip(const FInputActionValue& Value)
-{
-	EquipWeapon(CurrentWeapon); // 현재 장착된 무기를 장착하는 함수 호출
-
-	UE_LOG(LogTemp, Warning, TEXT("Equip action triggered!"));
-}
-
 void ACH3Character::Fire(const FInputActionValue& Value)
 {
-	// 총 발사 로직을 여기에 구현예정
-	UE_LOG(LogTemp, Warning, TEXT("Fire action triggered!"));
+	if (!CurrentWeaponInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("무기가 장착되어 있지 않습니다."));
+		return;
+	}
+
+	// 단발 모드일 때만 즉시 발사
+	if (CurrentWeaponInstance->GetFireMode() == EFireMode::SemiAuto)
+	{
+		CurrentWeaponInstance->HandleFire();
+	}
+	// 연사 모드일 때는 StartFire/StopFire를 입력 이벤트에 맞게 따로 호출해야 함
+	else if (CurrentWeaponInstance->GetFireMode() == EFireMode::FullAuto)
+	{
+		CurrentWeaponInstance->StartFire();
+		// Release 이벤트가 발생하면 StopFire를 호출하도록 설정
+	}
+
+}
+
+void ACH3Character::FireReleased()
+{
+	if (!CurrentWeaponInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("무기가 장착되어 있지 않습니다."));
+		return;
+	}
+	// 연사 모드일 때 StopFire 호출
+	if (CurrentWeaponInstance->GetFireMode() == EFireMode::FullAuto)
+	{
+		CurrentWeaponInstance->StopFire();
+	}
 }
 
 void ACH3Character::Dash(const FInputActionValue& Value)
 {
+	float CurrentTime = GetWorld()->GetTimeSeconds();
 
-	FVector DashDirection = GetMesh()->GetRightVector().GetSafeNormal(); // 대시 방향 설정
-	FVector DashVelocity = DashDirection * DashSpeed; // 대시 속도 설정
+	if (CurrentTime - LastDashTime < DashCooldown)
+	{
+		return;
+	}
 
-	LaunchCharacter(DashVelocity, true, true); // 캐릭터를 대시 방향으로 발사
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 
-	// 대시 쿨타임 구현예정
+	if (MovementComponent && MovementComponent->IsMovingOnGround())
+	{
+		// 플레이어의 마지막 입력 방향을 가져온다
+		FVector DashDirection = MovementComponent->GetLastInputVector();
+
+		// 입력이 없으면 함수를 즉시 종료하여 대시가 실행되지 않도록 합니다.
+		if (DashDirection.IsNearlyZero())
+		{
+			return;
+		}
+
+		// 대시 방향의 Z축을 0으로 강제 설정한다
+		DashDirection.Z = 0.0f;
+		DashDirection.Normalize();
+
+		FVector DashVelocity = DashDirection * DashSpeed;
+
+		LaunchCharacter(DashVelocity, true, false);
+
+		LastDashTime = CurrentTime;
+	}
 }
 
-void ACH3Character::EquipWeapon(TSubclassOf<AWeapon> NewWeaponClass) // 무기를 장착하는 함수
+
+void ACH3Character::EquipWeapon(TSubclassOf<AWeapon> NewWeaponClass)
 {
 	if (NewWeaponClass)
 	{
-		if (CurrentWeaponInstance)
+		if (CurrentWeaponInstance) // 기존 무기가 있다면
 		{
-			CurrentWeaponInstance->Destroy(); // 현재 장착된 무기가 있다면 파괴
+			CurrentWeaponInstance->Destroy(); // 파괴합니다.
+			CurrentWeaponInstance = nullptr; // 포인터를 nullptr로 초기화합니다.
 		}
-		CurrentWeaponInstance = GetWorld()->SpawnActor<AWeapon>(NewWeaponClass); // 새로운 무기 인스턴스를 생성
-		if (CurrentWeaponInstance)
-		{
-			CurrentWeaponInstance->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("hand_rSocket")); // 무기를 캐릭터의 손에 붙임
-			CurrentWeaponInstance->SetOwner(this); // 무기의 소유자를 현재 캐릭터로 설정
-			GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None); // 무기 뼈대를 숨김
-		}
+
+
+		// 새로운 무기 인스턴스를 스폰하여 CurrentWeaponInstance에 할당합니다.
+		CurrentWeaponInstance = GetWorld()->SpawnActor<AWeapon>(NewWeaponClass);
+
+			// 새로 생성된 무기의 콜리전을 비활성화하여 루프를 방지합니다.
+			if (CurrentWeaponInstance->GetMesh())
+			{
+				CurrentWeaponInstance->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			}
+
+			CurrentWeaponInstance->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("hand_rSocket"));
+			CurrentWeaponInstance->SetOwner(this);
+			GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
 	}
 }

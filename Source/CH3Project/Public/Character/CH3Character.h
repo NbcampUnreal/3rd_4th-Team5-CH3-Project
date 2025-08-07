@@ -43,7 +43,12 @@ public:
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
-	float DashSpeed;
+	float DashSpeed; // 대시 속도
+	float LastDashTime; // 마지막 대시 시간
+	float DashCooldown; // 대시 쿨타임
+	void FirePressed();
+	void FireReleased();
+
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
