@@ -84,8 +84,8 @@ DerivedDataCache/*
 
 # Prerequisites
 *.d
-<<<<<<< HEAD
+
 *.user
-=======
+
 UpgradeLog.htm
->>>>>>> origin/Gamemode
+
