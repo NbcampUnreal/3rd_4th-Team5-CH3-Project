@@ -22,18 +22,12 @@ public:
 	UPROPERTY(EditInstanceOnly,BlueprintReadWrite, Category = "AI")
 	FVector PatrolCenter;
 
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	TSubclassOf<AAIWeaponActor> WeaponClass;
-	
-	UPROPERTY()
-	AAIWeaponActor* CurrentWeapon;
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UStaticMeshComponent* WeaponMeshComp;
 
 	void setMoveSpeed(float NewSpeed);
 	void PerformMeleeAttack();
 	void PerformRangedAttack();
-
 	void HandleDeath();
 
 
