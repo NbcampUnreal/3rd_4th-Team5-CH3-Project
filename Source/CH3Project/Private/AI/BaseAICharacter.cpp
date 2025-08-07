@@ -1,9 +1,9 @@
 #include "AI/BaseAICharacter.h"
 #include "AI/BaseAIController.h"
 #include "AI/AIHealthComponent.h"
-#include "AI/AIWeaponActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "BrainComponent.h"
 
 
@@ -19,6 +19,9 @@ ABaseAICharacter::ABaseAICharacter()
 	Movement->RotationRate = FRotator(0.0f, 360.0f, 0.0f);
 
 	HealthComponent = CreateDefaultSubobject<UAIHealthComponent>(TEXT("HealthComponent"));
+
+	WeaponMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMeshComp"));
+	WeaponMeshComp->SetupAttachment(GetMesh(), TEXT("WeaponSocket"));	
 }
 
 void ABaseAICharacter::BeginPlay()
@@ -26,16 +29,6 @@ void ABaseAICharacter::BeginPlay()
 	Super::BeginPlay();
 
 	UE_LOG(LogTemp, Warning, TEXT("AI Character %s has begun play."), *GetName());
-
-	if (WeaponClass)
-	{
-		CurrentWeapon = GetWorld()->SpawnActor<AAIWeaponActor>(WeaponClass);
-		if (CurrentWeapon)
-		{
-			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("WeaponSocket"));
-		}
-	}
-
 }
 
 void ABaseAICharacter::setMoveSpeed(float NewSpeed)
