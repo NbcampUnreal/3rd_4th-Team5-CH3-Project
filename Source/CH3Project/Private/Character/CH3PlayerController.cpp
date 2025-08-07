@@ -38,10 +38,10 @@ void ACH3PlayerController::MouseLook() // 마우스 위치를 바라보도록 �
 		{
 			FVector PawnLocation = PlayerPawn->GetActorLocation(); // 현재 플레이어 폰의 위치를 가져옴
 			// 타겟 위치를 HitResult의 위치로 설정하되, Z축은 플레이어 폰의 Z축과 동일하게 설정
-			FVector TargetLocation = FVector(HitResult.Location.X, HitResult.Location.Y, PawnLocation.Z); 
+			FVector TargetLocation = FVector(HitResult.Location.X, HitResult.Location.Y, PawnLocation.Z);
 
 			if (!PawnLocation.Equals(TargetLocation, 1.0f)) // 플레이어 폰의 위치와 타겟 위치가 다를 때만 회전
-			{	
+			{
 				FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(PawnLocation, TargetLocation); // 타겟 위치를 바라보는 회전값을 계산
 				FRotator CurrentRotation = PlayerPawn->GetActorRotation(); // 현재 플레이어 폰의 회전값을 가져옴
 
@@ -52,6 +52,8 @@ void ACH3PlayerController::MouseLook() // 마우스 위치를 바라보도록 �
 			}
 		}
 	}
+
+
 }
 
 void ACH3PlayerController::PlayerTick(float DeltaTime) // 플레이어 컨트롤러의 틱 함수

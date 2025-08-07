@@ -33,6 +33,7 @@ AWeapon::AWeapon()
 	PickupTrigger->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
 	Mesh->SetRelativeRotation(FRotator(20.0f, 220.0f, 0.0f));
+	Mesh->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName); // 무기의 메쉬는 충돌을 하지 않도록 설정합니다.
 
 }
 
@@ -147,17 +148,21 @@ void AWeapon::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 
 	ACH3Character* Character = Cast<ACH3Character>(OtherActor); // ACH3Character로 수정
 
+	// Stackoverflow가 발생하지 않도록 캐릭터가 무기를 획득할 때만 실행되게 수정
+	if (Character) // 캐릭터가 무기를 획득할 때
+	{
 
-	if (!Character)
-		return;
+		if (PickupTrigger)
+		{
+			PickupTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision);// 오버랩이 발생하면 트리거의 충돌을 비활성화
+		}
 
 
-
-	Character->EquipWeapon(GetClass()); // 캐릭터의 EquipWeapon 함수를 호출하도록 수정
-
-	PickupTrigger->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 오버랩이 발생하면 트리거의 충돌을 비활성화
+		//Character->EquipWeapon(GetClass()); // 캐릭터의 EquipWeapon 함수를 호출하도록 수정
 
 
+		//this->Destroy(); // 무기를 파괴합니다.
+	}
 }
 
 // 최대 탄약량을 설정하고 현재 탄약량을 최대치로 초기화합니다.
@@ -211,4 +216,15 @@ void AWeapon::PlayFireEffects()
 			MuzzleOffset->GetComponentRotation()
 		);
 	}
+}
+
+EFireMode AWeapon::GetFireMode() const // 사격 모드를 반환하는 함수
+{
+	return FireMode;
+}
+
+// WeaponMesh를 반환하는 GetMesh() 함수 정의
+UStaticMeshComponent* AWeapon::GetMesh() const
+{
+	return Mesh;
 }

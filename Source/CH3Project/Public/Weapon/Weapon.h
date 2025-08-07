@@ -98,6 +98,9 @@ public:
 	void SetFireMode(EFireMode Mode); // 사격 모드 설정 함수
 	void SetBullet(TSubclassOf<ABullet> Bullet); // 총알 설정 함수
 
+	EFireMode GetFireMode() const; // 사격 모드 가져오기 함수
+	UStaticMeshComponent* GetMesh() const; // 무기 메쉬 가져오기 함수
+
 
 	
 };
