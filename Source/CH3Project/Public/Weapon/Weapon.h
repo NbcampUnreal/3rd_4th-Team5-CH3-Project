@@ -28,12 +28,10 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
-	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
-	TObjectPtr<USceneComponent> Root;
+	
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	TObjectPtr<UStaticMeshComponent> Mesh;
+	TObjectPtr<USkeletalMeshComponent> Mesh;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class USceneComponent> MuzzleOffset; 
@@ -99,7 +97,7 @@ public:
 	void SetBullet(TSubclassOf<ABullet> Bullet); // 총알 설정 함수
 
 	EFireMode GetFireMode() const; // 사격 모드 가져오기 함수
-	UStaticMeshComponent* GetMesh() const; // 무기 메쉬 가져오기 함수
+	USkeletalMeshComponent* GetMesh() const; // 무기 메쉬 가져오기 함수
 
 
 	

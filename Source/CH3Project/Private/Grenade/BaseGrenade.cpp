@@ -9,7 +9,7 @@ ABaseGrenade::ABaseGrenade()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	GrenadeMesh = CreateDefaultSubobject<UStaticMeshComponent>("GrenadeMesh");
+	GrenadeMesh = CreateDefaultSubobject<USkeletalMeshComponent>("GrenadeMesh");
 	RootComponent = GrenadeMesh;
 
 	MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("MovementComponent"));

@@ -35,7 +35,7 @@ protected:
 
 protected:
 	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* GrenadeMesh;
+	USkeletalMeshComponent* GrenadeMesh;
 	
 	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* PickupTrigger; //수류탄 클래스 계열의 픽업 오버랩

@@ -2,7 +2,7 @@
 
 
 #include "Weapon/Weapon.h"
-#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/SphereComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Bullet.h"
@@ -13,13 +13,10 @@
 
 AWeapon::AWeapon()
 {
-	PrimaryActorTick.bCanEverTick = true;
-
-	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
-	RootComponent = Root;
-
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
-	Mesh->SetupAttachment(Root);
+	PrimaryActorTick.bCanEverTick = false;
+	
+	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	RootComponent = Mesh;
 	
 	MuzzleOffset = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleOffset"));
 	MuzzleOffset->SetupAttachment(Mesh);
@@ -224,7 +221,7 @@ EFireMode AWeapon::GetFireMode() const // 사격 모드를 반환하는 함수
 }
 
 // WeaponMesh를 반환하는 GetMesh() 함수 정의
-UStaticMeshComponent* AWeapon::GetMesh() const
+USkeletalMeshComponent* AWeapon::GetMesh() const
 {
 	return Mesh;
 }
