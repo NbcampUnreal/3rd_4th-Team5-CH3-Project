@@ -74,14 +74,21 @@ void ABaseAIController::OnPerceptionUpdate(AActor* Actor, FAIStimulus Stimulus)
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
+		// 적이 시야에 들어오면 그 즉시 움직임 멈춤
+		StopMovement();
+		
 		DrawDebugString(GetWorld(), Actor->GetActorLocation() + FVector(0, 0, 100), FString::Printf(TEXT("Detected: %s"), *Actor->GetName()), nullptr, FColor::Green, 2.0f, true);
 
 		GetBlackboardComponent()->SetValueAsObject(TEXT("TargetActor"), Actor);
 		GetBlackboardComponent()->ClearValue(TEXT("LastKnownLocation"));
+		// 발견시 액터에 시야 고정
+		SetFocus(Actor);
 	}
 	
 	else
 	{
+		// 시야에서 벗어났을 때 해제
+		ClearFocus(EAIFocusPriority::Gameplay);
 		DrawDebugString(GetWorld(), Actor->GetActorLocation() + FVector(0, 0, 100), FString::Printf(TEXT("Lost: %s"), *Actor->GetName()), nullptr, FColor::Red, 2.0f, true);
 		bool bIsCurrentlySearching = GetBlackboardComponent()->GetValueAsBool(TEXT("IsSearching"));
 
