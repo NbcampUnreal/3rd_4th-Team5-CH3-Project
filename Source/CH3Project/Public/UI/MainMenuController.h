@@ -5,7 +5,7 @@
 #include "MainMenuController.generated.h"
 
 /**
- ¸ŞÀÎ È­¸é¿¡¼­¸¸ ÀÛµ¿µÉ ÄÁÆ®·Ñ·¯ Çì´õÆÄÀÏÀÔ´Ï´Ù. ¾ÆÁ÷ °³³ä °øºÎÁß..
+ ë©”ì¸ í™”ë©´ì—ì„œë§Œ ì‘ë™ë  ì»¨íŠ¸ë¡¤ëŸ¬ í—¤ë”íŒŒì¼ì…ë‹ˆë‹¤. ì•„ì§ ê°œë… ê³µë¶€ì¤‘..
  */
 UCLASS()
 class CH3PROJECT_API AMainMenuController : public APlayerController
@@ -19,20 +19,20 @@ protected:
 public:
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	
-	// ¸ŞÀÎ¸Ş´ºÀ§Á¬ ºí·çÇÁ¸°Æ® ´ã´Â º¯¼ö
+	// ë©”ì¸ë©”ë‰´ìœ„ì ¯ ë¸”ë£¨í”„ë¦°íŠ¸ ë‹´ëŠ” ë³€ìˆ˜
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UUserWidget> MainMenuWidgetClass;
 
 	UPROPERTY()
 	class UUserWidget* MainMenuWidgetInstance;
 
-	// Á¦¾îÇÒ Ä«¸Ş¶ó¿Í ÃÊ±â Æ®·£½ºÆû
+	// ì œì–´í•  ì¹´ë©”ë¼ì™€ ì´ˆê¸° íŠ¸ëœìŠ¤í¼
 	UPROPERTY()
 	class ACameraActor* MenuCamera;
 	
 	FTransform InitialCameraTransform;
 
-	// Ä«¸Ş¶ó ÀÌµ¿ °ü·Ã ¼³Á¤°ª
+	// ì¹´ë©”ë¼ ì´ë™ ê´€ë ¨ ì„¤ì •ê°’
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float MaxCameraOffset = 10.0f;
 
