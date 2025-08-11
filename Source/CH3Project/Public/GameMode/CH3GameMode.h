@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
@@ -6,7 +6,7 @@
 
 /**
  * ACH3GameMode
- * - °ÔÀÓ ÁøÇà, ½Ã°£ °ü¸®, Á¡¼ö ½Ã½ºÅÛ, °ÔÀÓ ¿À¹ö Ã³¸® µîÀÇ ÇÙ½É ·êÀ» ´ã´çÇÏ´Â Å¬·¡½º
+ * - ê²Œì„ ì§„í–‰, ì‹œê°„ ê´€ë¦¬, ì ìˆ˜ ì‹œìŠ¤í…œ, ê²Œì„ ì˜¤ë²„ ì²˜ë¦¬ ë“±ì˜ í•µì‹¬ ë£°ì„ ë‹´ë‹¹í•˜ëŠ” í´ë˜ìŠ¤
  */
 UCLASS()
 class CH3PROJECT_API ACH3GameMode : public AGameModeBase
@@ -14,40 +14,40 @@ class CH3PROJECT_API ACH3GameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
-	// »ı¼ºÀÚ
+	// ìƒì„±ì
 	ACH3GameMode();
 
-	// °ÔÀÓ ½ÃÀÛ ½Ã È£Ãâ
+	// ê²Œì„ ì‹œì‘ ì‹œ í˜¸ì¶œ
 	virtual void BeginPlay() override;
 
-	// ¸Å ÇÁ·¹ÀÓ¸¶´Ù È£ÃâµÇ¾î ½Ã°£ °ü¸® µî¿¡ »ç¿ë
+	// ë§¤ í”„ë ˆì„ë§ˆë‹¤ í˜¸ì¶œë˜ì–´ ì‹œê°„ ê´€ë¦¬ ë“±ì— ì‚¬ìš©
 	virtual void Tick(float DeltaSeconds) override;
 
-	/** Á¦ÇÑ ½Ã°£ (ÃÊ ´ÜÀ§) */
+	/** ì œí•œ ì‹œê°„ (ì´ˆ ë‹¨ìœ„) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timne")
 	float TimeLimit = 180.f;
 
-	/** ³²Àº ½Ã°£ */
+	/** ë‚¨ì€ ì‹œê°„ */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Time")
 	float RemainingTime;
 
-	/** ÇÃ·¹ÀÌ¾îÀÇ ÇöÀç Á¡¼ö */
+	/** í”Œë ˆì´ì–´ì˜ í˜„ì¬ ì ìˆ˜ */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Score")
 	int32 PlayerScore;
 
-	/** °ÔÀÓ ¿À¹ö ¿©ºÎ¸¦ ³ªÅ¸³¿ */
+	/** ê²Œì„ ì˜¤ë²„ ì—¬ë¶€ë¥¼ ë‚˜íƒ€ëƒ„ */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
 	bool bIsGameOver;
 
-	/** Àû Ã³Ä¡ ½Ã Á¡¼ö¸¦ Ãß°¡ÇÏ´Â ÇÔ¼ö */
+	/** ì  ì²˜ì¹˜ ì‹œ ì ìˆ˜ë¥¼ ì¶”ê°€í•˜ëŠ” í•¨ìˆ˜ */
 	UFUNCTION(BlueprintCallable)
 	void AddScore(int32 ScoreAmount);
 
-	/** Á¦ÇÑ ½Ã°£ ÃÊ°ú ¶Ç´Â ÇÃ·¹ÀÌ¾î »ç¸Á ½Ã È£ÃâµÇ´Â °ÔÀÓ ¿À¹ö Ã³¸® ÇÔ¼ö */
+	/** ì œí•œ ì‹œê°„ ì´ˆê³¼ ë˜ëŠ” í”Œë ˆì´ì–´ ì‚¬ë§ ì‹œ í˜¸ì¶œë˜ëŠ” ê²Œì„ ì˜¤ë²„ ì²˜ë¦¬ í•¨ìˆ˜ */
 	UFUNCTION(BlueprintCallable)
 	void GameOver();
 
-	/** ÇÃ·¹ÀÌ¾î°¡ »ç¸ÁÇßÀ» ¶§ È£ÃâÇÏ´Â ÇÔ¼ö (¿ÜºÎ¿¡¼­ È£Ãâ °¡´É) */
+	/** í”Œë ˆì´ì–´ê°€ ì‚¬ë§í–ˆì„ ë•Œ í˜¸ì¶œí•˜ëŠ” í•¨ìˆ˜ (ì™¸ë¶€ì—ì„œ í˜¸ì¶œ ê°€ëŠ¥) */
 	UFUNCTION(BlueprintCallable)
 	void OnPlayerDeath();
 };
