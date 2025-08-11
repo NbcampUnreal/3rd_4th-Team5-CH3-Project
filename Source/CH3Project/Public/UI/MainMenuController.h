@@ -5,7 +5,7 @@
 #include "MainMenuController.generated.h"
 
 /**
- ¸ÞÀÎ È­¸é¿¡¼­¸¸ ÀÛµ¿µÉ ÄÁÆ®·Ñ·¯ Çì´õÆÄÀÏÀÔ´Ï´Ù. ¾ÆÁ÷ °³³ä °øºÎÁß..
+ ï¿½ï¿½ï¿½ï¿½ È­ï¿½é¿¡ï¿½ï¿½ï¿½ï¿½ ï¿½Ûµï¿½ï¿½ï¿½ ï¿½ï¿½Æ®ï¿½Ñ·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´Ï´ï¿½. ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½..
  */
 UCLASS()
 class CH3PROJECT_API AMainMenuController : public APlayerController
@@ -16,26 +16,28 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
+
 public:
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	
-	// ¸ÞÀÎ¸Þ´ºÀ§Á¬ ºí·çÇÁ¸°Æ® ´ã´Â º¯¼ö
+	// ï¿½ï¿½ï¿½Î¸Þ´ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UUserWidget> MainMenuWidgetClass;
 
 	UPROPERTY()
 	class UUserWidget* MainMenuWidgetInstance;
 
-	// Á¦¾îÇÒ Ä«¸Þ¶ó¿Í ÃÊ±â Æ®·£½ºÆû
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ä«ï¿½Þ¶ï¿½ï¿½ ï¿½Ê±ï¿½ Æ®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY()
 	class ACameraActor* MenuCamera;
 	
 	FTransform InitialCameraTransform;
 
-	// Ä«¸Þ¶ó ÀÌµ¿ °ü·Ã ¼³Á¤°ª
+	// Ä«ï¿½Þ¶ï¿½ ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float MaxCameraOffset = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float CameraInterpSpeed = 5.0f;
+
 };

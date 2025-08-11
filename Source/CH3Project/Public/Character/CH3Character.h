@@ -34,7 +34,6 @@ public:
 	AWeapon* CurrentWeaponInstance; // 현재 장착된 무기의 인스턴스
 
 	void Move(const FInputActionValue& Value);
-	void Equip(const FInputActionValue& Value);
 	void Fire(const FInputActionValue& Value);
 	void Dash(const FInputActionValue& Value);
 
@@ -46,10 +45,15 @@ public:
 	float DashSpeed; // 대시 속도
 	float LastDashTime; // 마지막 대시 시간
 	float DashCooldown; // 대시 쿨타임
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
+	float Health = 100.0f;
+
 	void FirePressed();
 	void FireReleased();
+	UFUNCTION(BlueprintCallable, Category = "Character")
+	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 캐릭터가 피해를 입었을 때 호출되는 함수
 
-	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 };
