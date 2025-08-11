@@ -5,7 +5,9 @@
 #include "MainMenuController.generated.h"
 
 /**
- ���� ȭ�鿡���� �۵��� ��Ʈ�ѷ� ��������Դϴ�. ���� ���� ������..
+
+ 메인 화면에서만 작동될 컨트롤러 헤더파일입니다. 아직 개념 공부중..
+
  */
 UCLASS()
 class CH3PROJECT_API AMainMenuController : public APlayerController
@@ -20,20 +22,26 @@ protected:
 public:
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	
-	// ���θ޴����� �������Ʈ ��� ����
+
+	// 메인메뉴위젯 블루프린트 담는 변수
+
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<class UUserWidget> MainMenuWidgetClass;
 
 	UPROPERTY()
 	class UUserWidget* MainMenuWidgetInstance;
 
-	// ������ ī�޶�� �ʱ� Ʈ������
+
+	// 제어할 카메라와 초기 트랜스폼
+
 	UPROPERTY()
 	class ACameraActor* MenuCamera;
 	
 	FTransform InitialCameraTransform;
 
-	// ī�޶� �̵� ���� ������
+
+	// 카메라 이동 관련 설정값
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float MaxCameraOffset = 10.0f;
 
