@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
@@ -6,8 +6,8 @@
 
 /**
  * ACH3GameState
- * - °ÔÀÓÀÇ Á¡¼ö, ³²Àº ½Ã°£, °ÔÀÓ ¿À¹ö »óÅÂ µîÀ» ÀúÀå ¹× °øÀ¯ÇÏ´Â Å¬·¡½º
- * - ÁÖ·Î UI¿ÍÀÇ ¿¬µ¿ ¶Ç´Â ³×Æ®¿öÅ© µ¿±âÈ­¿¡ »ç¿ë
+ * - ê²Œì„ì˜ ì ìˆ˜, ë‚¨ì€ ì‹œê°„, ê²Œì„ ì˜¤ë²„ ìƒíƒœ ë“±ì„ ì €ì¥ ë° ê³µìœ í•˜ëŠ” í´ë˜ìŠ¤
+ * - ì£¼ë¡œ UIì™€ì˜ ì—°ë™ ë˜ëŠ” ë„¤íŠ¸ì›Œí¬ ë™ê¸°í™”ì— ì‚¬ìš©
  */
 UCLASS()
 class CH3PROJECT_API ACH3GameState : public AGameStateBase
@@ -17,27 +17,27 @@ class CH3PROJECT_API ACH3GameState : public AGameStateBase
 public:
 	ACH3GameState();
 
-	// ÇöÀç Á¡¼ö
+	// í˜„ì¬ ì ìˆ˜
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Score")
 	int32 CurrentScore;
 
-	// ³²Àº ½Ã°£
+	// ë‚¨ì€ ì‹œê°„
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Time")
 	float RemainingTime;
 
-	// °ÔÀÓ ¿À¹ö ¿©ºÎ
+	// ê²Œì„ ì˜¤ë²„ ì—¬ë¶€
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
 	bool bIsGameOver;
 
-	// Á¡¼ö ¼³Á¤ ÇÔ¼ö
+	// ì ìˆ˜ ì„¤ì • í•¨ìˆ˜
 	void SetScore(int32 NewScore);
 
-	// Á¡¼ö °¡Á®¿À±â ÇÔ¼ö
+	// ì ìˆ˜ ê°€ì ¸ì˜¤ê¸° í•¨ìˆ˜
 	int32 GetScore() const;
 
-	// ³²Àº ½Ã°£ ¼³Á¤ ÇÔ¼ö
+	// ë‚¨ì€ ì‹œê°„ ì„¤ì • í•¨ìˆ˜
 	void SetRemainingTime(float Time);
 
-	// °ÔÀÓ ¿À¹ö »óÅÂ ¼³Á¤ ÇÔ¼ö
+	// ê²Œì„ ì˜¤ë²„ ìƒíƒœ ì„¤ì • í•¨ìˆ˜
 	void SetGameOver(bool bOver);
 };
