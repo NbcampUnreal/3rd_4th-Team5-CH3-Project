@@ -1,6 +1,7 @@
 #include "AI/BaseAICharacter.h"
 #include "AI/BaseAIController.h"
 #include "AI/AIHealthComponent.h"
+#include "Character/CH3Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -86,7 +87,9 @@ void ABaseAICharacter::PerformRangedAttack()
 		}
 		AActor* HitActor = HitResult.GetActor();
 		//Enemy 태그가 있는 경우에만 처리
-		if (HitActor && HitActor->ActorHasTag("Enemy"))
+		//if (HitActor && HitActor->ActorHasTag("Enemy"))
+		// 위 코드를 AI캐릭터와 플레이어 캐릭터 둘 다에게 적용하기 위해 조건을 변경함
+		if (HitActor && (HitActor->IsA(ACH3Character::StaticClass()) || HitActor->IsA(ABaseAICharacter::StaticClass())))
 		{
 			UGameplayStatics::ApplyDamage(
 				HitActor,  //피해를 입힐 액터

@@ -15,7 +15,7 @@ class CH3PROJECT_API AMainMenuGameMode : public AGameMode
 	GENERATED_BODY()
 	
 public:
-	// »ý¼ºÀÚ¸¦ ±âº» ÇüÅÂ·Î ¼±¾ðÇÕ´Ï´Ù.
+	// ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ ï¿½âº» ï¿½ï¿½ï¿½Â·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
 	AMainMenuGameMode();
 };
 
