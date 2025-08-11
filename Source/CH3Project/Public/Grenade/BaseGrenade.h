@@ -24,12 +24,12 @@ protected:
 
 	void StartFuseTimer();
 
+	//오버랩 시 습득하는 구조, 미구현 코드
 	/*
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	*/
-	//virtual void Throw(FVector Direction, float Force); // 투척
 
 	TSubclassOf<AActor> GetGrenadeProjectileClass() const { return GrenadeProjectileClass; }
 

@@ -17,7 +17,14 @@ AWeapon::AWeapon()
 	
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	RootComponent = Mesh;
+
 	
+	//컨버트 과정에서 마테리얼 미적용으로 인한 추가 보충
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MatObj(TEXT("/Script/Engine.Material'/Game/Weapons_Free/Materials/M_Material.M_Material'"));
+	if (MatObj.Succeeded())
+	{
+		Mesh->SetMaterial(0, MatObj.Object); // 0번 슬롯
+	}
 	MuzzleOffset = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleOffset"));
 	MuzzleOffset->SetupAttachment(Mesh);
 
