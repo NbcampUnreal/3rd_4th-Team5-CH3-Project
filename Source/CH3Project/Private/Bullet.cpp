@@ -5,7 +5,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "NiagaraFunctionLibrary.h"
-#include "NiagaraComponent.h"
 
 
 ABullet::ABullet()

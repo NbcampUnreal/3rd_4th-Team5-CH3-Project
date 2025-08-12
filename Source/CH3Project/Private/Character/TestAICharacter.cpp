@@ -9,7 +9,7 @@ ATestAICharacter::ATestAICharacter()
 	if (WeaponClass == nullptr)
 	{
 
-		static ConstructorHelpers::FClassFinder<AWeapon> WeaponBP(TEXT("/Script/Engine.Blueprint'/Game/Weapon/AssultRifle/Weapon/BP_AssaulRifle.BP_AssaulRifle'"));
+		static ConstructorHelpers::FClassFinder<AWeapon> WeaponBP(TEXT("/Script/Engine.Blueprint'/Game/Weapon/AssultRifle/Weapon/BP_AssaultRifle.BP_AssaultRifle''"));
 
 		if (WeaponBP.Succeeded())
 		{
