@@ -36,23 +36,29 @@ public:
 	void Move(const FInputActionValue& Value);
 	void Fire(const FInputActionValue& Value);
 	void Dash(const FInputActionValue& Value);
+	void FireModeChanged(const FInputActionValue& Value);
+	void UiPause(const FInputActionValue& Value);
+
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void EquipWeapon(TSubclassOf<AWeapon> NewWeaponClass);
-
+	void FireReleased();
+	
+	UFUNCTION(BlueprintCallable, Category = "Character")
+	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 캐릭터가 피해를 입었을 때 호출되는 함수
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
 	float DashSpeed; // 대시 속도
 	float LastDashTime; // 마지막 대시 시간
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dash")
 	float DashCooldown; // 대시 쿨타임
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	float Health = 100.0f;
 
-	void FirePressed();
-	void FireReleased();
-	UFUNCTION(BlueprintCallable, Category = "Character")
-	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 캐릭터가 피해를 입었을 때 호출되는 함수
+	void PlayFireMontage(); // 애니메이션 몽타주 재생 함수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	TObjectPtr<class UAnimMontage> FireAnimMontage; // 발사 애니메이션 몽타주
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
