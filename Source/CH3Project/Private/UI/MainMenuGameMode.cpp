@@ -6,8 +6,10 @@
 
 AMainMenuGameMode::AMainMenuGameMode()
 {
-	// °ÔÀÓ¸ğµå°¡ »ç¿ëÇÒ ±âº» ÇÃ·¹ÀÌ¾î ÄÁÆ®·Ñ·¯¸¦ ÁöÁ¤
+
+	// ê²Œì„ëª¨ë“œê°€ ì‚¬ìš©í•  ê¸°ë³¸ í”Œë ˆì´ì–´ ì»¨íŠ¸ë¡¤ëŸ¬ë¥¼ ì§€ì •
 	PlayerControllerClass = AMainMenuController::StaticClass();
-	// ::StaticClass()´Â C++ Å¬·¡½º¿¡ ´ëÇÑ ¾ğ¸®¾ó ¿£ÁøÀÇ UClass Á¤º¸¸¦ °¡Á®¿À´Â ¿ªÇÒÇÑ´Ù.
-	// PlayerControllerClass º¯¼ö´Â ÀÌ UClass Å¸ÀÔÀÇ Á¤º¸¸¦ ¹Ş·Î·Ï ¼³Á¤µÇ¾îÀÖ´Ù.
+	// ::StaticClass()ëŠ” C++ í´ë˜ìŠ¤ì— ëŒ€í•œ ì–¸ë¦¬ì–¼ ì—”ì§„ì˜ UClass ì •ë³´ë¥¼ ê°€ì ¸ì˜¤ëŠ” ì—­í• í•œë‹¤.
+	// PlayerControllerClass ë³€ìˆ˜ëŠ” ì´ UClass íƒ€ì…ì˜ ì •ë³´ë¥¼ ë°›ë¡œë¡ ì„¤ì •ë˜ì–´ìˆë‹¤.
+
 }

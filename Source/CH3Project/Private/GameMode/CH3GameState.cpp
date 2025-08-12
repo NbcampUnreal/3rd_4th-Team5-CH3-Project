@@ -1,6 +1,8 @@
-#include "GameMode/CH3GameState.h"
+ï»¿#include "GameMode/CH3GameState.h"
 
-// »ı¼ºÀÚ: ±âº»°ª ÃÊ±âÈ­
+
+// ìƒì„±ì: ê¸°ë³¸ê°’ ì´ˆê¸°í™”
+
 ACH3GameState::ACH3GameState()
 {
 	CurrentScore = 0;
@@ -8,25 +10,33 @@ ACH3GameState::ACH3GameState()
 	bIsGameOver = false;
 }
 
-// Á¡¼ö ¼³Á¤
+
+// ì ìˆ˜ ì„¤ì •
+
 void ACH3GameState::SetScore(int32 NewScore)
 {
 	CurrentScore = NewScore;
 }
 
-// Á¡¼ö Á¶È¸
+
+// ì ìˆ˜ ì¡°íšŒ
+
 int32 ACH3GameState::GetScore() const
 {
 	return CurrentScore;
 }
 
-// ³²Àº ½Ã°£ ¼³Á¤
+
+// ë‚¨ì€ ì‹œê°„ ì„¤ì •
+
 void ACH3GameState::SetRemainingTime(float Time)
 {
 	RemainingTime = Time;
 }
 
-// °ÔÀÓ ¿À¹ö »óÅÂ ¼³Á¤
+
+// ê²Œì„ ì˜¤ë²„ ìƒíƒœ ì„¤ì •
+
 void ACH3GameState::SetGameOver(bool bOver)
 {
 	bIsGameOver = bOver;

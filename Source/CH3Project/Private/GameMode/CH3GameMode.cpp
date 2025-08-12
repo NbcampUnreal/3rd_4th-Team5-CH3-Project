@@ -1,17 +1,21 @@
-#include "GameMode/CH3GameMode.h"
+ï»¿#include "GameMode/CH3GameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerController.h"
 
-// »ı¼ºÀÚ: ±âº»°ª ÃÊ±âÈ­
+
+// ìƒì„±ì: ê¸°ë³¸ê°’ ì´ˆê¸°í™”
 ACH3GameMode::ACH3GameMode()
 {
-	PrimaryActorTick.bCanEverTick = true; // Tick ÇÔ¼ö È°¼ºÈ­
+	PrimaryActorTick.bCanEverTick = true; // Tick í•¨ìˆ˜ í™œì„±í™”
+
+
 	PlayerScore = 0;
 	RemainingTime = TimeLimit;
 	bIsGameOver = false;
 }
 
-// °ÔÀÓ ½ÃÀÛ ½Ã È£ÃâµÇ´Â ÇÔ¼ö
+
+// ê²Œì„ ì‹œì‘ ì‹œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜
 void ACH3GameMode::BeginPlay()
 {
 	Super::BeginPlay();
@@ -20,35 +24,41 @@ void ACH3GameMode::BeginPlay()
 	bIsGameOver = false;
 }
 
-// ¸Å ÇÁ·¹ÀÓ¸¶´Ù È£ÃâµÇ¾î ³²Àº ½Ã°£ Ã¼Å©
+
+// ë§¤ í”„ë ˆì„ë§ˆë‹¤ í˜¸ì¶œë˜ì–´ ë‚¨ì€ ì‹œê°„ ì²´í¬
 void ACH3GameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// °ÔÀÓÀÌ ³¡³­ °æ¿ì Ã³¸®ÇÏÁö ¾ÊÀ½
+
+	// ê²Œì„ì´ ëë‚œ ê²½ìš° ì²˜ë¦¬í•˜ì§€ ì•ŠìŒ
 	if (bIsGameOver) return;
 
 	RemainingTime -= DeltaSeconds;
 
-	// Á¦ÇÑ ½Ã°£ Á¾·á ½Ã °ÔÀÓ ¿À¹ö Ã³¸®
+
+	// ì œí•œ ì‹œê°„ ì¢…ë£Œ ì‹œ ê²Œì„ ì˜¤ë²„ ì²˜ë¦¬
 	if (RemainingTime <= 0.f)
 	{
 		GameOver();
 	}
 }
 
-// Á¡¼ö¸¦ Ãß°¡ÇÏ´Â ÇÔ¼ö
+
+// ì ìˆ˜ë¥¼ ì¶”ê°€í•˜ëŠ” í•¨ìˆ˜
 void ACH3GameMode::AddScore(int32 ScoreAmount)
 {
 	if (bIsGameOver) return;
 
 	PlayerScore += ScoreAmount;
 
-	// ·Î±×·Î Á¡¼ö Ãâ·Â
+
+	// ë¡œê·¸ë¡œ ì ìˆ˜ ì¶œë ¥
 	UE_LOG(LogTemp, Log, TEXT("Score Updated: %d"), PlayerScore);
 }
 
-// °ÔÀÓ ¿À¹ö Ã³¸® ÇÔ¼ö
+// ê²Œì„ ì˜¤ë²„ ì²˜ë¦¬ í•¨ìˆ˜
+
 void ACH3GameMode::GameOver()
 {
 	if (bIsGameOver) return;
@@ -57,18 +67,20 @@ void ACH3GameMode::GameOver()
 
 	UE_LOG(LogTemp, Warning, TEXT("Game Over! Final Score: %d"), PlayerScore);
 
-	// ÇÃ·¹ÀÌ¾î ÀÔ·Â Â÷´Ü ¹× ¸¶¿ì½º Ä¿¼­ È°¼ºÈ­
+
+	// í”Œë ˆì´ì–´ ì…ë ¥ ì°¨ë‹¨ ë° ë§ˆìš°ìŠ¤ ì»¤ì„œ í™œì„±í™”
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
 	if (PC)
 	{
-		PC->SetCinematicMode(true, false, false, true, true); // ÀÔ·Â Â÷´Ü
+		PC->SetCinematicMode(true, false, false, true, true); // ì…ë ¥ ì°¨ë‹¨
 		PC->bShowMouseCursor = true;
-		PC->SetPause(true); // °ÔÀÓ ÀÏ½ÃÁ¤Áö
+		PC->SetPause(true); // ê²Œì„ ì¼ì‹œì •ì§€
 	}
 }
 
-// ¿ÜºÎ¿¡¼­ È£ÃâÇÏ´Â ÇÃ·¹ÀÌ¾î »ç¸Á ½Ã Ã³¸® ÇÔ¼ö
+// ì™¸ë¶€ì—ì„œ í˜¸ì¶œí•˜ëŠ” í”Œë ˆì´ì–´ ì‚¬ë§ ì‹œ ì²˜ë¦¬ í•¨ìˆ˜
 void ACH3GameMode::OnPlayerDeath()
 {
-	GameOver(); // µ¿ÀÏÇÑ GameOver ·ÎÁ÷ ½ÇÇà
+	GameOver(); // ë™ì¼í•œ GameOver ë¡œì§ ì‹¤í–‰
+	
 }

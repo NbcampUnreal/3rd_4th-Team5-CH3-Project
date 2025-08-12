@@ -2,28 +2,34 @@
 #include "Kismet/GameplayStatics.h"
 #include "Camera/CameraActor.h"
 #include "Blueprint/UserWidget.h"
+#include "Character/CH3Character.h"
+#include "Character/CH3PlayerController.h"
 
 void AMainMenuController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 1. ·¹º§¿¡ ÀÖ´Â Ä«¸Ş¶ó ¾×ÅÍ Ã£±â
+
+	// 1. ë ˆë²¨ì— ìˆëŠ” ì¹´ë©”ë¼ ì•¡í„° ì°¾ê¸°
 	MenuCamera = Cast<ACameraActor>(UGameplayStatics::GetActorOfClass(GetWorld(), ACameraActor::StaticClass()));
 	if (MenuCamera)
 	{
-		// Ä«¸Ş¶ó¸¦ Ã£¾ÒÀ» ¶§ Ãâ·Â
-		UE_LOG(LogTemp, Error, TEXT("Ä«¸Ş¶ó Ã£±â ¼º°ø: %s"), *MenuCamera->GetName());
+		// ì¹´ë©”ë¼ë¥¼ ì°¾ì•˜ì„ ë•Œ ì¶œë ¥
+		UE_LOG(LogTemp, Error, TEXT("ì¹´ë©”ë¼ ì°¾ê¸° ì„±ê³µ: %s"), *MenuCamera->GetName());
+
 
 		InitialCameraTransform = MenuCamera->GetActorTransform();
 		SetViewTargetWithBlend(MenuCamera, 1.f);
 	}
 	else
 	{
-		// Ä«¸Ş¶ó¸¦ ¸ø Ã£¾ÒÀ» ¶§ Ãâ·Â
-		UE_LOG(LogTemp, Error, TEXT("·¹º§¿¡¼­ CameraActor¸¦ Ã£Áö ¸øÇß½À´Ï´Ù!"));
+
+		// ì¹´ë©”ë¼ë¥¼ ëª» ì°¾ì•˜ì„ ë•Œ ì¶œë ¥
+		UE_LOG(LogTemp, Error, TEXT("ë ˆë²¨ì—ì„œ CameraActorë¥¼ ì°¾ì§€ ëª»í–ˆìŠµë‹ˆë‹¤!"));
 	}
 
-	// 2. À§Á¬ »ı¼º ¹× ¸¶¿ì½º ¼³Á¤
+	// 2. ìœ„ì ¯ ìƒì„± ë° ë§ˆìš°ìŠ¤ ì„¤ì •
+
 	if (MainMenuWidgetClass)
 	{
 		MainMenuWidgetInstance = CreateWidget<UUserWidget>(this, MainMenuWidgetClass);
@@ -42,27 +48,31 @@ void AMainMenuController::Tick(float DeltaTime)
 	//
 	// if (!MenuCamera) return;
 	//
-	// // 3. ¸¶¿ì½º À§Ä¡¸¦ ±â¹İÀ¸·Î Ä«¸Ş¶ó À§Ä¡ °è»ê
+
+	// // 3. ë§ˆìš°ìŠ¤ ìœ„ì¹˜ë¥¼ ê¸°ë°˜ìœ¼ë¡œ ì¹´ë©”ë¼ ìœ„ì¹˜ ê³„ì‚°
 	// float MouseX, MouseY;
 	// GetMousePosition(MouseX, MouseY);
 	//
-	// // ¾Æ ¤»¤» ³»¹®Á¦ ¾Æ´Ï³× ~¤»¤»¤»
+	// // ì•„ ã…‹ã…‹ ë‚´ë¬¸ì œ ì•„ë‹ˆë„¤ ~ã…‹ã…‹ã…‹
 	//
-	// // FVector2D ViewportSize; <- º¯¼ö ´Ş¶ó¼­ ¾ÈµÊ ¤µ¤¡
+	// // FVector2D ViewportSize; <- ë³€ìˆ˜ ë‹¬ë¼ì„œ ì•ˆë¨ ã……ã„±
+
 	// int32 ViewportX = 0, ViewportY = 0;
 	// GetViewportSize(ViewportX, ViewportY);
 	//
 	// if (ViewportY > 0 && ViewportX > 0)
 	// {
-	// 	// -1 to 1 ¹üÀ§·Î Á¤±ÔÈ­
+
+	// 	// -1 to 1 ë²”ìœ„ë¡œ ì •ê·œí™”
 	// 	const float NormalizedX = (MouseX / ViewportX) * 2.f - 1.f;
 	// 	const float NormalizedY = (MouseY / ViewportY) * 2.f - 1.f;
 	//
-	// 	// ¿ÀÇÁ¼Â °è»ê (¾ğ¸®¾ó ÁÂÇ¥°è¿¡ ¸Â°Ô Y¸¦ Z·Î, X¸¦ Y·Î ¸ÅÇÎ)
+	// 	// ì˜¤í”„ì…‹ ê³„ì‚° (ì–¸ë¦¬ì–¼ ì¢Œí‘œê³„ì— ë§ê²Œ Yë¥¼ Zë¡œ, Xë¥¼ Yë¡œ ë§¤í•‘)
 	// 	const FVector CameraOffset = FVector(-NormalizedX * MaxCameraOffset, 0.0f , -NormalizedY * MaxCameraOffset);
 	// 	const FVector TargetLocation = InitialCameraTransform.GetLocation() + CameraOffset;
 	//
-	// 	// 4. ºÎµå·´°Ô º¸°£ÇÏ¿© À§Ä¡ ¾÷µ¥ÀÌÆ®
+	// 	// 4. ë¶€ë“œëŸ½ê²Œ ë³´ê°„í•˜ì—¬ ìœ„ì¹˜ ì—…ë°ì´íŠ¸
+
 	// 	const FVector NewLocation = FMath::VInterpTo(MenuCamera->GetActorLocation(), TargetLocation, DeltaTime, CameraInterpSpeed);
 	// 	MenuCamera->SetActorLocation(NewLocation);
 	// }

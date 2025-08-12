@@ -8,6 +8,8 @@
 #include "Character/CH3PlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Weapon/Weapon.h"
+#include "UI/MainMenuController.h"
+#include "GameFramework/Character.h"
 
 
 ACH3Character::ACH3Character()
@@ -21,15 +23,23 @@ ACH3Character::ACH3Character()
 	CameraComp->SetupAttachment(SpringArmComp);
 
 	DashSpeed = 2000.0f; // DashSpeed 초기화
-	LastDashTime = -FLT_MAX; // FLT_MAX는 부동 소수점의 최대값으로 LastDashTime을 -FLT_MAX로 설정함으로써 캐릭터가 게임 시작 시 즉시 대시를 할 수 있도록 합니다.
+	LastDashTime = -FLT_MAX; // FLT_MAX는 부동 소수점의 최대값으로 LastDashTime을 -FLT_MAX로 설정함으로써 캐릭터가 게임 시작 시 즉시 대시를 할 수 있도록 함
 	DashCooldown = 1.0f; // 1초 쿨타임
+
+	//// 총알의 콜리전 채널(WorldDynamic)을 Ignore로 설정
+	//GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
+	//GetMesh()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Ignore);
 }
 
 void ACH3Character::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CurrentWeaponInstance = GetWorld()->SpawnActor<AWeapon>(CurrentWeapon); // 현재 장착된 무기의 인스턴스를 생성
+	if (CurrentWeapon)
+	{
+		CurrentWeaponInstance = GetWorld()->SpawnActor<AWeapon>(CurrentWeapon);
+	}
+
 	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None); // 무기 뼈대를 숨김
 
 	if (CurrentWeaponInstance) // 무기 인스턴스가 성공적으로 생성되었는지 확인
@@ -160,10 +170,10 @@ void ACH3Character::EquipWeapon(TSubclassOf<AWeapon> NewWeaponClass)
 		}
 
 
-		// 새로운 무기 인스턴스를 스폰하여 CurrentWeaponInstance에 할당합니다.
+		// 새로운 무기 인스턴스를 스폰하여 CurrentWeaponInstance에 할당
 		CurrentWeaponInstance = GetWorld()->SpawnActor<AWeapon>(NewWeaponClass);
 
-			// 새로 생성된 무기의 콜리전을 비활성화하여 루프를 방지합니다.
+			// 새로 생성된 무기의 콜리전을 비활성화하여 루프를 방지
 			if (CurrentWeaponInstance->GetMesh())
 			{
 				CurrentWeaponInstance->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -173,4 +183,21 @@ void ACH3Character::EquipWeapon(TSubclassOf<AWeapon> NewWeaponClass)
 			CurrentWeaponInstance->SetOwner(this);
 			GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
 	}
+}
+
+float ACH3Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	// 자신이 쏜 총알(Projectile, 무기 등)에 의한 데미지는 무시
+	if (DamageCauser && DamageCauser->GetOwner() == this)
+	{
+		return 0.0f; // 데미지 무시
+	}
+
+	Health -= DamageAmount; // 피해량만큼 체력을 감소시킨다
+	if (Health <= 0.0f) //체력이 0 이하가 되면 사망처리
+	{
+		Health = 0.0f;
+		Destroy();
+	}
+	return DamageAmount; // 실제로 입은 피해량을 반환
 }
