@@ -6,6 +6,7 @@
 
 class AAIWeaponActor;
 class UNiagaraSystem;
+class USoundBase;
 
 UCLASS()
 class CH3PROJECT_API ABaseAICharacter : public ACharacter
@@ -40,6 +41,8 @@ protected:
 	UNiagaraSystem* MuzzleEffect;
 	UPROPERTY(EditAnywhere, Category = "Combat|VFX")
 	UNiagaraSystem* HitEffect;
+	UPROPERTY(EditAnywhere, Category = "Combat|SFX")
+	USoundBase* FireSound;
 
 	class UAIHealthComponent* HealthComponent;
 

@@ -58,7 +58,7 @@ void ABaseAICharacter::PerformMeleeAttack()
 
 void ABaseAICharacter::PerformRangedAttack()
 {
-	// AIController와 Blackboard 컴포넌트 가져오기
+	// AIController와 Blackboard 컴포넌트 가져오기, 플레이어의 위치 가져옴
 	ABaseAIController* AIController = Cast<ABaseAIController>(GetController());
 	if (AIController == nullptr) return;
 	UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
@@ -101,13 +101,21 @@ void ABaseAICharacter::PerformRangedAttack()
 		);
 	}
 
+	if (FireSound)
+	{
+		// 총격 사운드 재생
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			FireSound,
+			StartLocation
+		);
+	}
+
 	if (bHit)
 	{
 		AActor* HitActor = HitResult.GetActor();
 		//Enemy 태그가 있는 경우에만 처리
-		//if (HitActor && HitActor->ActorHasTag("Enemy"))
-		// 위 코드를 AI캐릭터와 플레이어 캐릭터 둘 다에게 적용하기 위해 조건을 변경함
-		if (HitActor && (HitActor->IsA(ACH3Character::StaticClass()) || HitActor->IsA(ABaseAICharacter::StaticClass())))
+		if (HitActor && HitActor->ActorHasTag("Enemy"))
 		{
 			UGameplayStatics::ApplyDamage(
 				HitActor,
