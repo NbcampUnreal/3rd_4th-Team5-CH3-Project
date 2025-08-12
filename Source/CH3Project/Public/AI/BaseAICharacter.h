@@ -4,7 +4,8 @@
 #include "GameFramework/Character.h"
 #include "BaseAICharacter.generated.h"
 
-class AAIWeaponActor;	
+class AAIWeaponActor;
+class UNiagaraSystem;
 
 UCLASS()
 class CH3PROJECT_API ABaseAICharacter : public ACharacter
@@ -31,8 +32,14 @@ public:
 	void HandleDeath();
 
 
+
 protected:
 	virtual void BeginPlay() override;
+	
+	UPROPERTY(EditAnywhere, Category = "Combat|VFX")
+	UNiagaraSystem* MuzzleEffect;
+	UPROPERTY(EditAnywhere, Category = "Combat|VFX")
+	UNiagaraSystem* HitEffect;
 
 	class UAIHealthComponent* HealthComponent;
 
