@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/SphereComponent.h"
 #include "BaseGrenade.generated.h"
+
 
 class UProjectileMovementComponent;
 class UNiagaraSystem;
@@ -35,7 +38,11 @@ protected:
 
 protected:
 	UPROPERTY(VisibleAnywhere)
+	USphereComponent* CollisionComp;
+
+	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* GrenadeMesh;
+
 	
 	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* PickupTrigger; //수류탄 클래스 계열의 픽업 오버랩
@@ -56,6 +63,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Grenade")
 	TSubclassOf<AActor> GrenadeProjectileClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Effects")
+	USoundAttenuation* FireSoundAttenuation; //거리 비례 사격 소리 조정
 
 public:	
 	virtual void Tick(float DeltaTime) override;

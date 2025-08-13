@@ -1,13 +1,17 @@
 #include "AI/BaseAICharacter.h"
 #include "AI/BaseAIController.h"
 #include "AI/AIHealthComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Character/CH3Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "BrainComponent.h"
+#include "NiagaraFunctionLibrary.h"	
+#include "NiagaraComponent.h"
 
 
 
@@ -54,63 +58,94 @@ void ABaseAICharacter::PerformMeleeAttack()
 
 void ABaseAICharacter::PerformRangedAttack()
 {
-	if (GetWorld() == nullptr || WeaponMeshComp == nullptr) return;
+	// AIController와 Blackboard 컴포넌트 가져오기, 플레이어의 위치 가져옴
+	ABaseAIController* AIController = Cast<ABaseAIController>(GetController());
+	if (AIController == nullptr) return;
+	UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent();
+	if (BlackboardComp == nullptr) return;
+	AActor* TargetActor = Cast<AActor>(BlackboardComp->GetValueAsObject(TEXT("TargetActor")));
+	if (TargetActor == nullptr) return;
+	if (GetWorld() == nullptr || GetMesh() == nullptr) return;
 
-	//레이저의 시작 위치와 방향을 계산
-	const FVector StartLocation = WeaponMeshComp->GetSocketLocation(TEXT("AIMuzzleSocket"));
-	const FVector ForwardVector = GetActorForwardVector();
-	const float FireRange = 5000.0f; // 50m Range
-	const FVector EndLocation = StartLocation + (ForwardVector * FireRange);
+	// 총구의 조준선 계산
+	const FVector StartLocation = GetMesh()->GetSocketLocation(TEXT("AIMuzzleSocket"));
+	const FVector TargetLocation = TargetActor->GetActorLocation();
+	//총구와 플레이어를 바라보는 값 계산
+	const FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(StartLocation, TargetLocation);
+	//계산된 회전값을 순수 방향으로 변환
+	const FVector FireDirection = TargetRotation.Vector();
 
+	//라인 트레이스 발사
+	const float FireRange = 5000.0f; // 50m 사거리
+	const FVector EndLocation = StartLocation + (FireDirection * FireRange);
 	FHitResult HitResult;
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this);
-
-	//월드에 보이지 않는 라인 트레이스를 수행하여 적을 맞추는지 확인
-	TArray<FHitResult> HitResults;
-	bool bHit = GetWorld()->LineTraceMultiByChannel(
-		HitResults,    // 명중 결과(출력)
-		StartLocation,  //시작 점
-		EndLocation,	//끝 점
-		ECollisionChannel::ECC_Pawn, // 폰 타입과 충돌하도록 설정
-		CollisionParams	//충돌 파라미터
+	
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		StartLocation,
+		EndLocation,
+		ECC_Pawn,
+		CollisionParams
 	);
-	//명중 결과 처리
+
+	if (MuzzleEffect)
+	{
+		// 총구 이펙트 생성
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			GetWorld(),
+			MuzzleEffect,
+			StartLocation,
+			TargetRotation
+		);
+	}
+
+	if (FireSound)
+	{
+		// 총격 사운드 재생
+		UGameplayStatics::PlaySoundAtLocation(
+			this,
+			FireSound,
+			StartLocation
+		);
+	}
+
 	if (bHit)
 	{
-		for (const FHitResult& Hit : HitResults)
-		{
-			if (Hit.GetActor())
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *Hit.GetActor()->GetName());
-			}
-		}
 		AActor* HitActor = HitResult.GetActor();
 		//Enemy 태그가 있는 경우에만 처리
-		//if (HitActor && HitActor->ActorHasTag("Enemy"))
-		// 위 코드를 AI캐릭터와 플레이어 캐릭터 둘 다에게 적용하기 위해 조건을 변경함
-		if (HitActor && (HitActor->IsA(ACH3Character::StaticClass()) || HitActor->IsA(ABaseAICharacter::StaticClass())))
+		if (HitActor && HitActor->ActorHasTag("Enemy"))
 		{
 			UGameplayStatics::ApplyDamage(
-				HitActor,  //피해를 입힐 액터
-				10.0f,     //피해량
-				GetController(), //피해를 입힌 컨트롤러(AI)
-				this,      //실제 피해를 입힌 액터(AI)
-				UDamageType::StaticClass() //피해 유형
+				HitActor,
+				10.0f, 
+				AIController, 
+				this,
+				UDamageType::StaticClass() 
 			);
+			if (HitEffect)
+			{
+				// 적에게 맞았을 때 이펙트 생성
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+					GetWorld(),
+					HitEffect,
+					HitResult.ImpactPoint,
+					HitResult.ImpactNormal.Rotation()	
+				);
+			}
 		}
 	}
-	//디버그용으로 레이저를 시각적으로 표시
+
 	DrawDebugLine(
 		GetWorld(),
 		StartLocation,
 		EndLocation,
-		FColor::Red,
-		false, // 지속되지 않음
-		1.0f,  // 지속 시간
-		0,     // Depth Priority
-		1.0f   // 두께
+		FColor::Green,
+		false,
+		2.0f
 	);
+
 	UE_LOG(LogTemp, Warning, TEXT("%s Performs RANGED ATTACK!"), *GetName());
 }
 
