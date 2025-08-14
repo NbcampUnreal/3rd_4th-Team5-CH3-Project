@@ -1,86 +1,235 @@
 ﻿#include "GameMode/CH3GameMode.h"
+#include "UI/HUD_Widget.h"
+#include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/PlayerController.h"
+#include "Character/CH3Character.h"
+#include "AI/BaseAICharacter.h"
+#include "Spawn/SpawnVolume.h"
 
-
-// 생성자: 기본값 초기화
 ACH3GameMode::ACH3GameMode()
 {
-	PrimaryActorTick.bCanEverTick = true; // Tick 함수 활성화
-
-
-	PlayerScore = 0;
-	RemainingTime = TimeLimit;
-	bIsGameOver = false;
+	PrimaryActorTick.bCanEverTick = false;
 }
 
-
-// 게임 시작 시 호출되는 함수
 void ACH3GameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	RemainingTime = TimeLimit;
-	bIsGameOver = false;
+	// 스폰 볼륨 찾기
+	TArray<AActor*> Found;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnVolume::StaticClass(), Found);
+	for (AActor* A : Found)
+	{
+		if (auto* V = Cast<ASpawnVolume>(A))
+		{
+			SpawnVolumes.Add(V);
+		}
+	}
+
+	// HUD 생성
+	if (HUDWidgetClass)
+	{
+		HUDWidget = CreateWidget<UHUD_Widget>(GetWorld(), HUDWidgetClass);
+		if (HUDWidget)
+		{
+			HUDWidget->AddToViewport();
+		}
+	}
+
+	// 플레이어 파괴 감시
+	if (ACharacter* PlayerChar = UGameplayStatics::GetPlayerCharacter(this, 0))
+	{
+		PlayerChar->OnDestroyed.AddDynamic(this, &ACH3GameMode::OnPlayerDestroyed);
+	}
+
+	bGameActive = false;
+	CurrentWaveIndex = -1;
+	KillCount = 0;
+	Score = 0;
 }
 
-
-// 매 프레임마다 호출되어 남은 시간 체크
-void ACH3GameMode::Tick(float DeltaSeconds)
+void ACH3GameMode::StartGame()
 {
-	Super::Tick(DeltaSeconds);
+	if (bGameActive) return;
+	bGameActive = true;
 
+	CurrentWaveIndex = -1;
+	KillCount = 0;
+	Score = 0;
 
-	// 게임이 끝난 경우 처리하지 않음
-	if (bIsGameOver) return;
+	GetWorldTimerManager().ClearTimer(GameTimerHandle);
+	GetWorldTimerManager().SetTimer(GameTimerHandle, this,
+		&ACH3GameMode::TickGameTimer, 1.f, true);
 
-	RemainingTime -= DeltaSeconds;
+	StartNextWave();
+}
 
-
-	// 제한 시간 종료 시 게임 오버 처리
-	if (RemainingTime <= 0.f)
+void ACH3GameMode::StartNextWave()
+{
+	++CurrentWaveIndex;
+	if (!Waves.IsValidIndex(CurrentWaveIndex))
 	{
-		GameOver();
+		GameOver(true);
+		return;
+	}
+
+	const FWaveConfig& Wave = Waves[CurrentWaveIndex];
+	RemainingToSpawn = Wave.EnemyCount;
+	AliveEnemies = 0;
+	RemainingTimeSeconds = Wave.TimeLimitSeconds;
+
+	if (Wave.EnemyCount > 0 && MonsterClass)
+	{
+		GetWorldTimerManager().SetTimer(
+			WaveSpawnTimerHandle,
+			this,
+			&ACH3GameMode::SpawnOneEnemy,
+			Wave.SpawnInterval,
+			true
+		);
 	}
 }
 
-
-// 점수를 추가하는 함수
-void ACH3GameMode::AddScore(int32 ScoreAmount)
+void ACH3GameMode::SpawnOneEnemy()
 {
-	if (bIsGameOver) return;
-
-	PlayerScore += ScoreAmount;
-
-
-	// 로그로 점수 출력
-	UE_LOG(LogTemp, Log, TEXT("Score Updated: %d"), PlayerScore);
-}
-
-// 게임 오버 처리 함수
-
-void ACH3GameMode::GameOver()
-{
-	if (bIsGameOver) return;
-
-	bIsGameOver = true;
-
-	UE_LOG(LogTemp, Warning, TEXT("Game Over! Final Score: %d"), PlayerScore);
-
-
-	// 플레이어 입력 차단 및 마우스 커서 활성화
-	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
-	if (PC)
+	if (!bGameActive) return;
+	if (RemainingToSpawn <= 0)
 	{
-		PC->SetCinematicMode(true, false, false, true, true); // 입력 차단
-		PC->bShowMouseCursor = true;
-		PC->SetPause(true); // 게임 일시정지
+		GetWorldTimerManager().ClearTimer(WaveSpawnTimerHandle);
+		return;
+	}
+
+	FVector SpawnLoc;
+	if (GetRandomSpawnLocation(SpawnLoc))
+	{
+		if (ABaseAICharacter* Spawned = GetWorld()->SpawnActor<ABaseAICharacter>(MonsterClass, SpawnLoc, FRotator::ZeroRotator))
+		{
+			++AliveEnemies;
+			--RemainingToSpawn;
+
+			// 적 사망 감시
+			Spawned->OnDestroyed.AddDynamic(this, &ACH3GameMode::OnEnemyDestroyed);
+		}
 	}
 }
 
-// 외부에서 호출하는 플레이어 사망 시 처리 함수
-void ACH3GameMode::OnPlayerDeath()
+void ACH3GameMode::OnEnemyDestroyed(AActor* DestroyedActor)
 {
-	GameOver(); // 동일한 GameOver 로직 실행4
-	
+	ReportEnemyDeath();
+}
+
+void ACH3GameMode::OnPlayerDestroyed(AActor* DestroyedActor)
+{
+	ReportPlayerDeath();
+}
+
+void ACH3GameMode::CheckWaveEnd()
+{
+	if (!bGameActive) return;
+	if (AliveEnemies <= 0 && RemainingToSpawn <= 0)
+	{
+		StartNextWave();
+	}
+}
+
+void ACH3GameMode::TickGameTimer()
+{
+	if (!bGameActive) return;
+
+	--RemainingTimeSeconds;
+	UpdateHUDTimer();
+
+	if (RemainingTimeSeconds <= 0)
+	{
+		RemainingTimeSeconds = 0;
+		GameOver(false);
+	}
+}
+
+void ACH3GameMode::GameOver(bool bVictory)
+{
+	if (!bGameActive) return;
+	bGameActive = false;
+
+	GetWorldTimerManager().ClearTimer(GameTimerHandle);
+	GetWorldTimerManager().ClearTimer(WaveSpawnTimerHandle);
+
+	RemainingToSpawn = 0;
+	AliveEnemies = 0;
+
+	if (bVictory)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Game Over: VICTORY! Score=%d, Kills=%d"), Score, KillCount);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Game Over: DEFEAT! Score=%d, Kills=%d"), Score, KillCount);
+	}
+}
+
+bool ACH3GameMode::GetRandomSpawnLocation(FVector& OutLocation) const
+{
+	if (SpawnVolumes.Num() == 0) return false;
+
+	int32 Index = FMath::RandRange(0, SpawnVolumes.Num() - 1);
+	if (ASpawnVolume* Volume = SpawnVolumes[Index])
+	{
+		OutLocation = Volume->GetRandomPointInVolume();
+		return true;
+	}
+	return false;
+}
+
+void ACH3GameMode::ReportEnemyDeath()
+{
+	if (!bGameActive) return;
+
+	--AliveEnemies;
+	++KillCount;
+	Score += 100;
+
+	UpdateHUDScore();
+	UpdateHUDKills();
+
+	CheckWaveEnd();
+}
+
+void ACH3GameMode::ReportPlayerDeath()
+{
+	if (!bGameActive) return;
+
+	GameOver(false);
+}
+
+void ACH3GameMode::UpdateHUDTimer()
+{
+	if (HUDWidget && HUDWidget->GetWidgetFromName(TEXT("HUD_Timer")))
+	{
+		if (UTextBlock* TimerText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("HUD_Timer"))))
+		{
+			TimerText->SetText(FText::FromString(FString::Printf(TEXT("%d"), RemainingTimeSeconds)));
+		}
+	}
+}
+
+void ACH3GameMode::UpdateHUDScore()
+{
+	if (HUDWidget && HUDWidget->GetWidgetFromName(TEXT("HUD_Score")))
+	{
+		if (UTextBlock* ScoreText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("HUD_Score"))))
+		{
+			ScoreText->SetText(FText::FromString(FString::Printf(TEXT("Score: %d"), Score)));
+		}
+	}
+}
+
+void ACH3GameMode::UpdateHUDKills()
+{
+	if (HUDWidget && HUDWidget->GetWidgetFromName(TEXT("HUD_Kills")))
+	{
+		if (UTextBlock* KillText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("HUD_Kills"))))
+		{
+			KillText->SetText(FText::FromString(FString::Printf(TEXT("Kills: %d"), KillCount)));
+		}
+	}
 }
