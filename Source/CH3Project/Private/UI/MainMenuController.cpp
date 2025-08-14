@@ -44,36 +44,63 @@ void AMainMenuController::BeginPlay()
 	}
 	SetShowMouseCursor(true);
 	SetInputMode(FInputModeGameAndUI());
+
+	bShowMouseCursor = true; // 커서 표시
+	FInputModeGameAndUI InputMode;
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
+	InputMode.SetHideCursorDuringCapture(false); 
+	SetInputMode(InputMode);
+	
 }
 
 void AMainMenuController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	
+	if (!bIsCameraInitialized) return;
+	
+	if (!MenuCamera) return;
 
-	// if (!bIsCameraInitialized) return;
-	//
-	// if (!MenuCamera) return;
-	//
-	// // 3. 마우스 위치를 기반으로 카메라 위치 계산
-	// float MouseX, MouseY;
-	// GetMousePosition(MouseX, MouseY);
-	// int32 ViewportX = 0, ViewportY = 0;
-	// GetViewportSize(ViewportX, ViewportY);
-	//
-	// if (ViewportY > 0 && ViewportX > 0)
-	// {
-	//
-	// 	// -1 to 1 범위로 정규화
-	// 	const float NormalizedX = (MouseX / ViewportX) * 2.f - 1.f;
-	// 	const float NormalizedY = (MouseY / ViewportY) * 2.f - 1.f;
-	//
-	// 	// 오프셋 계산 (언리얼 좌표계에 맞게 Y를 Z로, X를 Y로 매핑)
-	// 	const FVector CameraOffset = FVector(-NormalizedX * MaxCameraOffset, 0.0f , -NormalizedY * MaxCameraOffset);
-	// 	const FVector TargetLocation = InitialCameraTransform.GetLocation() + CameraOffset;
-	//
-	// 	// 4. 부드럽게 보간하여 위치 업데이트
-	//
-	// 	const FVector NewLocation = FMath::VInterpTo(MenuCamera->GetActorLocation(), TargetLocation, DeltaTime, CameraInterpSpeed);
-	// 	MenuCamera->SetActorLocation(NewLocation);
-	// }
+	float MouseX, MouseY;
+	if (!GetMousePosition(MouseX, MouseY))
+	{
+		return; // 마우스 좌표 못 얻으면 종료
+	}
+
+	int32 ViewportX = 0, ViewportY = 0;
+	GetViewportSize(ViewportX, ViewportY);
+
+	if (ViewportX <= 0 || ViewportY <= 0)
+	{
+		return;
+	}
+
+	// 뷰포트 안에 있는지 체크
+	if (MouseX < 0 || MouseX > ViewportX || MouseY < 0 || MouseY > ViewportY)
+	{
+		// 마우스가 뷰포트 밖이면 카메라 중앙으로 복귀
+		const FVector NewLocation = FMath::VInterpTo(
+			MenuCamera->GetActorLocation(),
+			InitialCameraTransform.GetLocation(),
+			DeltaTime,
+			CameraInterpSpeed
+		);
+		MenuCamera->SetActorLocation(NewLocation);
+		return;
+	}
+
+	// 범위 제한 후 정규화
+	MouseX = FMath::Clamp(MouseX, 0.f, (float)ViewportX);
+	MouseY = FMath::Clamp(MouseY, 0.f, (float)ViewportY);
+
+	const float NormalizedX = (MouseX / ViewportX) * 2.f - 1.f;
+	const float NormalizedY = (MouseY / ViewportY) * 2.f - 1.f;
+
+	const FVector CameraOffset = FVector(-NormalizedX * MaxCameraOffset, 0.f, -NormalizedY * MaxCameraOffset);
+	const FVector TargetLocation = InitialCameraTransform.GetLocation() + CameraOffset;
+
+	const FVector NewLocation = FMath::VInterpTo(MenuCamera->GetActorLocation(), TargetLocation, DeltaTime, CameraInterpSpeed);
+	MenuCamera->SetActorLocation(NewLocation);
+	
 }

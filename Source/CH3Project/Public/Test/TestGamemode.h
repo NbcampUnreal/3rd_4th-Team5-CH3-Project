@@ -85,7 +85,7 @@ protected:
 	bool GetRandomSpawnLocation(FVector& OutLocation) const;
 
 	UPROPERTY(EditAnywhere, Category="UI")
-	TSubclassOf<UUserWidget> HUDWidgetClass; // 설계도
+	TSubclassOf<UUserWidget> HUDWidgetClass; //각각 위젯마다 추가해야함.
 
 	
 public:
@@ -94,7 +94,6 @@ public:
 	// 상태 플래그 - 게임이 실행중인지 아닌지
 	//bool bGameActive = false;
 
-	// 몬스터가 죽을 때 호출 - MonsterAI에서
 	void ReportEnemyDeath();
 	
 private:
