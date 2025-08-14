@@ -10,6 +10,8 @@
 #include "Weapon/Weapon.h"
 #include "UI/MainMenuController.h"
 #include "GameFramework/Character.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimMontage.h"
 
 
 ACH3Character::ACH3Character()
@@ -75,6 +77,14 @@ void ACH3Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 			{
 				EnhancedInputComponent->BindAction(MyController->DashAction, ETriggerEvent::Triggered, this, &ACH3Character::Dash);
 			}
+			if(MyController->FireModeAction)
+			{
+				EnhancedInputComponent->BindAction(MyController->FireModeAction, ETriggerEvent::Triggered, this, &ACH3Character::FireModeChanged);
+			}
+			/*if(MyController->UiPauseAction)
+			{
+				EnhancedInputComponent->BindAction(MyController->UiPauseAction, ETriggerEvent::Triggered, this, &ACH3Character::UiPause);
+			}*/
 		}
 	}
 
@@ -95,19 +105,20 @@ void ACH3Character::Fire(const FInputActionValue& Value)
 		UE_LOG(LogTemp, Warning, TEXT("무기가 장착되어 있지 않습니다."));
 		return;
 	}
-
+	PlayFireMontage(); // 발사 애니메이션 몽타주 재생
 	// 단발 모드일 때만 즉시 발사
-	if (CurrentWeaponInstance->GetFireMode() == EFireMode::SemiAuto)
+	if (CurrentWeaponInstance->GetFireMode() == EFireMode::SemiAuto) // 단발 모드일 때는 HandleFire를 즉시 호출
 	{
 		CurrentWeaponInstance->HandleFire();
 	}
 	// 연사 모드일 때는 StartFire/StopFire를 입력 이벤트에 맞게 따로 호출해야 함
-	else if (CurrentWeaponInstance->GetFireMode() == EFireMode::FullAuto)
+	else if (CurrentWeaponInstance->GetFireMode() == EFireMode::FullAuto) // 연사 모드일 때는 StartFire를 호출
 	{
 		CurrentWeaponInstance->StartFire();
 		// Release 이벤트가 발생하면 StopFire를 호출하도록 설정
 	}
 
+	
 }
 
 void ACH3Character::FireReleased()
@@ -185,6 +196,28 @@ void ACH3Character::EquipWeapon(TSubclassOf<AWeapon> NewWeaponClass)
 	}
 }
 
+void ACH3Character::FireModeChanged(const FInputActionValue& Value)
+{
+	if (CurrentWeaponInstance)
+	{
+		// 현재 무기의 발사 모드를 변경
+		if (CurrentWeaponInstance->GetFireMode() == EFireMode::SemiAuto)
+		{
+			CurrentWeaponInstance->SetFireMode(EFireMode::FullAuto);
+			UE_LOG(LogTemp, Warning, TEXT("발사 모드가 연사로 변경되었습니다."));
+		}
+		else if (CurrentWeaponInstance->GetFireMode() == EFireMode::FullAuto)
+		{
+			CurrentWeaponInstance->SetFireMode(EFireMode::SemiAuto);
+			UE_LOG(LogTemp, Warning, TEXT("발사 모드가 단발로 변경되었습니다."));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("무기가 장착되어 있지 않습니다."));
+	}
+}
+
 float ACH3Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	// 자신이 쏜 총알(Projectile, 무기 등)에 의한 데미지는 무시
@@ -201,3 +234,42 @@ float ACH3Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	}
 	return DamageAmount; // 실제로 입은 피해량을 반환
 }
+
+void ACH3Character::PlayFireMontage()
+{
+	if (FireAnimMontage && GetMesh())
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			AnimInstance->Montage_Play(FireAnimMontage); // 몽타주를 재생합니다.
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("애니메이션 인스턴스가 유효하지 않습니다."));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("발사 애니메이션 몽타주가 설정되지 않았습니다."));
+	}
+}
+
+//void ACH3Character::UiPause(const FInputActionValue& Value)
+//{
+//	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+//	{
+//		if (AMainMenuController* MainMenuController = Cast<AMainMenuController>(PlayerController)) // 메뉴호출 함수 만들어줘야함
+//		{
+//			MainMenuController->TogglePauseMenu(); // 메인 메뉴 컨트롤러의 토글 함수 호출
+//		}
+//		else
+//		{
+//			UE_LOG(LogTemp, Warning, TEXT("메인 메뉴 컨트롤러가 유효하지 않습니다."));
+//		}
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("플레이어 컨트롤러가 유효하지 않습니다."));
+//	}
+//}

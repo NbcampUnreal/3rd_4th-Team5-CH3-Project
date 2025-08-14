@@ -81,6 +81,6 @@ void ACH3GameMode::GameOver()
 // 외부에서 호출하는 플레이어 사망 시 처리 함수
 void ACH3GameMode::OnPlayerDeath()
 {
-	GameOver(); // 동일한 GameOver 로직 실행
+	GameOver(); // 동일한 GameOver 로직 실행4
 	
 }
