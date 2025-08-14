@@ -46,9 +46,9 @@ public:
 	// 카메라 이동 관련 설정값
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-	float MaxCameraOffset = 10.0f;
+	float MaxCameraOffset = 5.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-	float CameraInterpSpeed = 5.0f;
+	float CameraInterpSpeed = 2.0f;
 
 };
