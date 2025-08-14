@@ -28,6 +28,7 @@ void AMainMenuController::BeginPlay()
        UE_LOG(LogTemp, Error, TEXT("레벨에서 CameraActor를 찾지 못했습니다!"));
     }
 
+
     // 2. 위젯 생성 및 마우스 설정
     if (MainMenuWidgetClass)
     {
@@ -45,10 +46,12 @@ void AMainMenuController::BeginPlay()
    InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::LockAlways);
    InputMode.SetHideCursorDuringCapture(false); 
    SetInputMode(InputMode);
+
 }
 
 void AMainMenuController::Tick(float DeltaTime)
 {
+
     Super::Tick(DeltaTime);
     
     
@@ -96,5 +99,5 @@ void AMainMenuController::Tick(float DeltaTime)
 
     const FVector NewLocation = FMath::VInterpTo(MenuCamera->GetActorLocation(), TargetLocation, DeltaTime, CameraInterpSpeed);
     MenuCamera->SetActorLocation(NewLocation);
-    
+   
 }

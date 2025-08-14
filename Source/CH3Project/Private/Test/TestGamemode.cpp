@@ -34,7 +34,7 @@ void ATestGamemode::BeginPlay()
 		}
 	}
 
-	
+	StartGame();
 }
 
 
@@ -42,7 +42,7 @@ void ATestGamemode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (bIsGameOver) return;
+	if (!bIsGameOver) return;
 
 	RemainingTime -= DeltaSeconds;
 
@@ -200,7 +200,7 @@ void ATestGamemode::ReportEnemyDeath()
 
 void ATestGamemode::StartGame()
 {
-	if (bIsGameOver) return;
+	if (!bIsGameOver) return;
 	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
 		FInputModeGameOnly InputMode;
@@ -213,7 +213,7 @@ void ATestGamemode::StartGame()
 		GetWorldTimerManager().ClearTimer(GameTimerHandle); // 한번 기존 타이머 클리어
 		GetWorldTimerManager().SetTimer(GameTimerHandle, this,
 										&ATestGamemode::TickGameTimer, 1.f, true);
-
+		StartNextWave();
 	}
 	
 }
