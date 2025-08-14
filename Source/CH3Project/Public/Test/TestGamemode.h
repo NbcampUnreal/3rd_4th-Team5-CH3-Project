@@ -80,9 +80,14 @@ protected:
 	void CheckWaveEnd();
 	void TickGameTimer();
 
+
+	
 	bool GetRandomSpawnLocation(FVector& OutLocation) const;
 
+	UPROPERTY(EditAnywhere, Category="UI")
+	TSubclassOf<UUserWidget> HUDWidgetClass; // 설계도
 
+	
 public:
 	void StartGame(); // 다른쪽에서 호출 하기 위해 public에 위치
 

@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Spawn/SpawnVolume.h"
 #include "AI/BaseAICharacter.h"
+#include "UI/MainMenuController.h"
 
 ATestGamemode::ATestGamemode()
 {
@@ -32,6 +33,8 @@ void ATestGamemode::BeginPlay()
 			SpawnVolumes.Add(V);
 		}
 	}
+
+	
 }
 
 
@@ -112,7 +115,7 @@ void ATestGamemode::StartNextWave()
 
 void ATestGamemode::SpawnOneEnemy()
 {
-	if (!bIsGameOver) return;
+	if (bIsGameOver) return;
 
 	if (RemainingTime <= 0.f)
 	{
@@ -138,7 +141,7 @@ void ATestGamemode::SpawnOneEnemy()
 
 void ATestGamemode::CheckWaveEnd()
 {
-	if (!bIsGameOver) return;
+	if (bIsGameOver) return;
 
 	if (AliveEnemies <= 0 && RemainingToSpawn <= 0)
 	{
@@ -148,7 +151,7 @@ void ATestGamemode::CheckWaveEnd()
 
 void ATestGamemode::TickGameTimer()
 {
-	if (!bIsGameOver) return;
+	if (bIsGameOver) return;
 	--RemainingTime;
 
 	//위젯 추가할 공간
@@ -170,7 +173,7 @@ bool ATestGamemode::GetRandomSpawnLocation(FVector& OutLocation) const
 	int32 Index = FMath::RandRange(0, SpawnVolumes.Num() - 1);
 	if (ASpawnVolume* Volume = SpawnVolumes[Index])
 	{
-		OutLocation = Volume->GetActorLocation();
+		OutLocation = Volume->GetRandomPointInVolume();
 		return true;
 	}
 
@@ -179,7 +182,7 @@ bool ATestGamemode::GetRandomSpawnLocation(FVector& OutLocation) const
 
 void ATestGamemode::ReportEnemyDeath()
 {
-	if (!bIsGameOver) return;
+	if (bIsGameOver) return;
 
 	--AliveEnemies;
 	AddScore(100);
@@ -195,4 +198,23 @@ void ATestGamemode::ReportEnemyDeath()
 }
 
 
+void ATestGamemode::StartGame()
+{
+	if (bIsGameOver) return;
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	{
+		FInputModeGameOnly InputMode;
+		PC->SetInputMode(InputMode);
+		PC->SetShowMouseCursor(false);
+
+		CurrentWaveIndex = -1;
+		PlayerScore = 0;
+
+		GetWorldTimerManager().ClearTimer(GameTimerHandle); // 한번 기존 타이머 클리어
+		GetWorldTimerManager().SetTimer(GameTimerHandle, this,
+										&ATestGamemode::TickGameTimer, 1.f, true);
+
+	}
+	
+}
 
