@@ -32,7 +32,7 @@ ABaseAICharacter::ABaseAICharacter()
 	HealthComponent = CreateDefaultSubobject<UAIHealthComponent>(TEXT("HealthComponent"));
 
 	WeaponMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMeshComp"));
-	WeaponMeshComp->SetupAttachment(GetMesh(), TEXT("WeaponSocket"));	
+	WeaponMeshComp->SetupAttachment(GetMesh(), TEXT("WeaponSocket"));
 }
 
 void ABaseAICharacter::BeginPlay()
