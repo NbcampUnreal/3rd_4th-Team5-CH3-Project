@@ -62,4 +62,7 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// 마우스 커서 기준 조준 지점(월드 좌표) 계산
+	UFUNCTION(BlueprintCallable, Category = "Aim")
+	FVector GetAimTargetLocation(float TraceDistance = 100000.f) const;
 };
