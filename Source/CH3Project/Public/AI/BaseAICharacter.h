@@ -43,7 +43,8 @@ protected:
 	UNiagaraSystem* HitEffect;
 	UPROPERTY(EditAnywhere, Category = "Combat|SFX")
 	USoundBase* FireSound;
-
+	
+	UPROPERTY()
 	class UAIHealthComponent* HealthComponent;
 
 };
