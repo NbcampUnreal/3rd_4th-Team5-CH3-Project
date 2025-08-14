@@ -14,6 +14,10 @@ class CH3PROJECT_API AMainMenuController : public APlayerController
 {
 	GENERATED_BODY()
 
+private:
+	// 카메라 초기화가 완료되었는지 확인하는 플래그
+	bool bIsCameraInitialized = false;
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -21,7 +25,7 @@ protected:
 
 public:
 	// UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	
+	// AMainMenuController();
 
 	// 메인메뉴위젯 블루프린트 담는 변수
 
@@ -36,7 +40,6 @@ public:
 
 	UPROPERTY()
 	class ACameraActor* MenuCamera;
-	
 	FTransform InitialCameraTransform;
 
 
