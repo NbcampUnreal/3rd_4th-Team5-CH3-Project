@@ -8,6 +8,7 @@ class ASpawnVolume;
 class ABaseAICharacter;
 class ACH3Character;
 class UHUD_Widget;
+class UWeapon_Widget;
 
 USTRUCT(BlueprintType)
 struct FWaveConfig
@@ -31,6 +32,9 @@ class CH3PROJECT_API ACH3GameMode : public AGameModeBase
 
 public:
 	ACH3GameMode();
+	
+	UFUNCTION()
+	void UpdateWeaponMagazine_Size(FString MS);
 
 protected:
 	virtual void BeginPlay() override;
@@ -67,8 +71,16 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UHUD_Widget> HUDWidgetClass;
 
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UWeapon_Widget> WeaponWidgetClass;
+	
 	UPROPERTY()
 	UHUD_Widget* HUDWidget;
+	
+	UPROPERTY()
+	UWeapon_Widget* HUDWeaponWidget;
+
+
 
 	// 내부 함수
 	void StartNextWave();

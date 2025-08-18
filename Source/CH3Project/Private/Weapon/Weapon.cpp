@@ -8,8 +8,10 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Character/CH3Character.h" 
+#include "GameMode/CH3GameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+
 
 AWeapon::AWeapon()
 {
@@ -86,7 +88,6 @@ void AWeapon::StopFire()
 // HandleFire 함수는 무기가 발사될 때 호출됩니다.
 void AWeapon::HandleFire()
 {
-
 	if (bIsReloading || CurrentAmmo <= 0)
 	{
 
@@ -98,6 +99,15 @@ void AWeapon::HandleFire()
 	}
 
 	CurrentAmmo--;
+	auto* GameMode = UGameplayStatics::GetGameMode(GetWorld());
+	if (GameMode)
+	{
+		auto* MyGameMode = Cast<ACH3GameMode>(GameMode);
+		if (MyGameMode)
+		{
+			MyGameMode->UpdateWeaponMagazine_Size(FString::FromInt(CurrentAmmo));
+		}
+	}
 	
 	FVector SpawnLocation = MuzzleOffset->GetComponentLocation();
 	FRotator SpawnRotation = MuzzleOffset->GetComponentRotation();

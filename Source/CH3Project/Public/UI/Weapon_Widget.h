@@ -18,6 +18,8 @@ UCLASS()
 class CH3PROJECT_API UWeapon_Widget : public UUserWidget
 {
 	GENERATED_BODY()
+public:
+	virtual void NativeConstruct() override;
 	
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* Grenade_Count;
@@ -40,20 +42,20 @@ class CH3PROJECT_API UWeapon_Widget : public UUserWidget
 	
 public:
 	UFUNCTION(BlueprintCallable)
-	void SetTextGrenade_Count(FText GC);
+	void SetTextGrenade_Count(FString GC);
 	
 	UFUNCTION(BlueprintCallable)
-	void SetTextSmoke_Count(FText GC);
+	void SetTextSmoke_Count(FString SC);
 	
 	UFUNCTION(BlueprintCallable)
-	void SetTextMagazine_Size(FText GC);
+	void SetTextMagazine_Size(FString MS);
 	
 	UFUNCTION(BlueprintCallable)
-	void SetTextNumber_of_Bullets(FText GC);
+	void SetTextNumber_of_Bullets(FString NoB);
 	
 	UFUNCTION(BlueprintCallable)
-	void SetTextWeaponType_Name(FText GC);
+	void SetTextWeaponType_Name(FString WTN);
 
 	UFUNCTION(BlueprintCallable)
-	void SetTextWeaponType_Image(UTexture2D* Weapon_Image);
+	void SetTextWeaponType_Image(UTexture2D* WTI);
 };
