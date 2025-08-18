@@ -36,20 +36,10 @@ void ACH3PlayerController::MouseLook() // 마우스 위치를 바라보도록 �
 		APawn* const PlayerPawn = GetPawn();
 		if (PlayerPawn)
 		{
-			FVector PawnLocation = PlayerPawn->GetActorLocation(); // 현재 플레이어 폰의 위치를 가져옴
-			// 타겟 위치를 HitResult의 위치로 설정하되, Z축은 플레이어 폰의 Z축과 동일하게 설정
-			FVector TargetLocation = FVector(HitResult.Location.X, HitResult.Location.Y, PawnLocation.Z);
-
-			if (!PawnLocation.Equals(TargetLocation, 1.0f)) // 플레이어 폰의 위치와 타겟 위치가 다를 때만 회전
-			{
-				FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(PawnLocation, TargetLocation); // 타겟 위치를 바라보는 회전값을 계산
-				FRotator CurrentRotation = PlayerPawn->GetActorRotation(); // 현재 플레이어 폰의 회전값을 가져옴
-
-				if (!CurrentRotation.Equals(LookAtRotation, 0.1f)) // 현재 회전값과 타겟 회전값이 다를 때만 회전 적용
-				{
-					PlayerPawn->SetActorRotation(LookAtRotation); // 플레이어 폰의 회전값을 타겟 회전값으로 설정
-				}
-			}
+			// 플레이어 폰의 위치와 HitResult의 위치를 이용하여 바라보는 방향을 계산
+			FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(PlayerPawn->GetActorLocation(), FVector(HitResult.Location.X, HitResult.Location.Y, PlayerPawn->GetActorLocation().Z));
+			// 플레이어 폰의 회전값을 계산된 바라보는 방향으로 설정
+			PlayerPawn->SetActorRotation(LookAtRotation);
 		}
 	}
 
