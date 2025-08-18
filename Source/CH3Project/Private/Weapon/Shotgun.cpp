@@ -1,9 +1,9 @@
 //샷건 구현은 잠정 보류, 스폰 불릿 액터끼리 서로 겹치는 현상
 
 #include "Weapon/Shotgun.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Bullet.h"
-#include "TestCharacter.h" // 또는 나중에 BaseCharacter로 수정 필요
+#include "Character/CH3Character.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AShotgun::AShotgun()
 {
@@ -34,8 +34,8 @@ void AShotgun::HandleFire()
 	FVector SpawnLocation = MuzzleOffset->GetComponentLocation();
 	FRotator BaseRotation = MuzzleOffset->GetComponentRotation();
 
-	// 캐릭터가 존재한다면 에임 타겟 기준으로 방향 보정
-	if (ATestCharacter* OwnerCharacter = Cast<ATestCharacter>(GetOwner()))
+	
+	if (ACH3Character* OwnerCharacter = Cast<ACH3Character>(GetOwner()))
 	{
 		FVector AimTarget = OwnerCharacter->GetAimTargetLocation(); // 조준 지점 계산
 		BaseRotation = UKismetMathLibrary::FindLookAtRotation(SpawnLocation, AimTarget); // 조준 방향 계산

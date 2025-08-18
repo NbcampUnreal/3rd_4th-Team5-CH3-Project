@@ -8,8 +8,10 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Character/CH3Character.h" 
+#include "GameMode/CH3GameMode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+
 
 AWeapon::AWeapon()
 {
@@ -86,7 +88,6 @@ void AWeapon::StopFire()
 // HandleFire 함수는 무기가 발사될 때 호출됩니다.
 void AWeapon::HandleFire()
 {
-
 	if (bIsReloading || CurrentAmmo <= 0)
 	{
 
@@ -98,6 +99,15 @@ void AWeapon::HandleFire()
 	}
 
 	CurrentAmmo--;
+	auto* GameMode = UGameplayStatics::GetGameMode(GetWorld());
+	if (GameMode)
+	{
+		auto* MyGameMode = Cast<ACH3GameMode>(GameMode);
+		if (MyGameMode)
+		{
+			MyGameMode->UpdateWeaponMagazine_Size(FString::FromInt(CurrentAmmo));
+		}
+	}
 	
 	FVector SpawnLocation = MuzzleOffset->GetComponentLocation();
 	FRotator SpawnRotation = MuzzleOffset->GetComponentRotation();
@@ -134,6 +144,7 @@ void AWeapon::Reload()
 	}
 	bIsReloading = true;
 	GetWorld()->GetTimerManager().SetTimer(ReloadHandle, this, &AWeapon::FinishReload, ReloadTime, false);
+	
 }
 
 // 재장전이 완료되면 현재 탄약을 최대치로 설정하고 재장전 상태를 해제합니다.
@@ -143,6 +154,15 @@ void AWeapon::FinishReload()
 	bIsReloading = false;
 	UE_LOG(LogTemp, Warning, TEXT("리로드 완료됨. 현재 탄약: %d"), CurrentAmmo);
 
+	auto* GameMode = UGameplayStatics::GetGameMode(GetWorld());
+	if (GameMode)
+	{
+		auto* MyGameMode = Cast<ACH3GameMode>(GameMode);
+		if (MyGameMode)
+		{
+			MyGameMode->UpdateWeaponMagazine_Size(FString::FromInt(CurrentAmmo));
+		}
+	}
 }
 
 //오버랩 시 캐릭터의 AddWeaponToInventory 함수에 따라 인벤토리 내 저장이 됨.
