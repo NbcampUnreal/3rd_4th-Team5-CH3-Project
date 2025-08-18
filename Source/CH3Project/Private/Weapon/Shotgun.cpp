@@ -2,6 +2,8 @@
 
 #include "Weapon/Shotgun.h"
 #include "Bullet.h"
+#include "Character/CH3Character.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AShotgun::AShotgun()
 {
@@ -33,7 +35,11 @@ void AShotgun::HandleFire()
 	FRotator BaseRotation = MuzzleOffset->GetComponentRotation();
 
 	
-
+	if (ACH3Character* OwnerCharacter = Cast<ACH3Character>(GetOwner()))
+	{
+		FVector AimTarget = OwnerCharacter->GetAimTargetLocation(); // 조준 지점 계산
+		BaseRotation = UKismetMathLibrary::FindLookAtRotation(SpawnLocation, AimTarget); // 조준 방향 계산
+	}
 	
 	FActorSpawnParameters Params;
 	Params.Owner = GetOwner(); // 총의 소유자 지정 (중요: 총알에 의한 데미지 소스 추적 가능)
