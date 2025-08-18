@@ -14,12 +14,54 @@
 #include "Animation/AnimMontage.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/EngineTypes.h"
+#include "Blueprint/UserWidget.h"
+#include <UI/Character_Stats_Widget.h>
+
+void ACH3Character::EnsureCreateHUDs()
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC || !PC->IsLocalController())
+	{
+		return;
+	}
+
+	// 다중 스펙 생성
+	for (const FHUDWidgetSpec& Spec : HUDWidgetsToCreate)
+	{
+		if (!Spec.Class || Spec.Name.IsNone())
+		{
+			continue;
+		}
+		if (HUDWidgetInstances.Contains(Spec.Name))
+		{
+			continue; // 이미 생성됨
+		}
+
+		if (UUserWidget* W = CreateWidget<UUserWidget>(PC, Spec.Class))
+		{
+			W->AddToViewport(Spec.ZOrder);
+			HUDWidgetInstances.Add(Spec.Name, W);
+		}
+	}
+
+	// 기존 단일 HUD도 필요 시 생성
+	if (HUDWidgetClass && !HUDWidgetInstance)
+	{
+		if (UUserWidget* W = CreateWidget<UUserWidget>(PC, HUDWidgetClass))
+		{
+			W->AddToViewport();
+			HUDWidgetInstance = W;
+		}
+	}
+}
+
 ACH3Character::ACH3Character()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	SpringArmComp->SetupAttachment(RootComponent);
+	SpringArmComp->bDoCollisionTest = false;
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
@@ -48,11 +90,48 @@ void ACH3Character::BeginPlay()
 	{
 		CurrentWeaponInstance->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("hand_rSocket")); // 무기를 캐릭터의 손에 붙임
 		CurrentWeaponInstance->SetOwner(this); // 무기의 소유자를 현재 캐릭터로 설정
+		CurrentWeaponInstance->SetActorRelativeScale3D(FVector(0.7f)); // 무기의 크기를 조정 (필요에 따라 조정 가능)
 	}
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("무기 스폰에 실패했습니다! CurrentWeapon을 확인하세요.")); // 무기 스폰 실패 시 에러 로그 출력
 	}
+
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		if (PC->IsLocalController() && HUDWidgetClass)
+		{
+			HUDWidgetInstance = CreateWidget<UUserWidget>(PC, HUDWidgetClass);
+			if (HUDWidgetInstance)
+			{
+				HUDWidgetInstance->AddToViewport();
+			}
+		}
+	}
+
+	// BeginPlay에서도 시도(이미 소유 중인 경우)
+	EnsureCreateHUDs();
+}
+
+void ACH3Character::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	EnsureCreateHUDs();
+}
+
+void ACH3Character::OnRep_Controller()
+{
+	Super::OnRep_Controller();
+	EnsureCreateHUDs();
+}
+
+UUserWidget* ACH3Character::GetHUDWidgetByName(FName Name) const
+{
+	if (const TObjectPtr<UUserWidget>* Found = HUDWidgetInstances.Find(Name))
+	{
+		return Found->Get();
+	}
+	return nullptr;
 }
 
 void ACH3Character::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -105,18 +184,31 @@ void ACH3Character::Fire(const FInputActionValue& Value)
 		UE_LOG(LogTemp, Warning, TEXT("무기가 장착되어 있지 않습니다."));
 		return;
 	}
+
+	// 사격 시작: 이동속도 감소(Started 시 1회만)
+	if (UCharacterMovementComponent* Move = GetCharacterMovement())
+	{
+		if (!bIsFiring)
+		{
+			WalkSpeedBeforeFire = Move->MaxWalkSpeed;
+			Move->MaxWalkSpeed = WalkSpeedBeforeFire * FiringSpeedMultiplier;
+			bIsFiring = true;
+		}
+	}
+
 	PlayFireMontage(); // 발사 애니메이션 몽타주 재생
-	// 단발 모드일 때만 즉시 발사
-	if (CurrentWeaponInstance->GetFireMode() == EFireMode::SemiAuto) // 단발 모드일 때는 HandleFire를 즉시 호출
+
+	// 단발/연사 처리
+	if (CurrentWeaponInstance->GetFireMode() == EFireMode::SemiAuto)
 	{
 		CurrentWeaponInstance->HandleFire();
 	}
-	// 연사 모드일 때는 StartFire/StopFire를 입력 이벤트에 맞게 따로 호출해야 함
-	else if (CurrentWeaponInstance->GetFireMode() == EFireMode::FullAuto) // 연사 모드일 때는 StartFire를 호출
+	else if (CurrentWeaponInstance->GetFireMode() == EFireMode::FullAuto)
 	{
 		CurrentWeaponInstance->StartFire();
-		// Release 이벤트가 발생하면 StopFire를 호출하도록 설정
 	}
+	PlayAnimMontage(FireAnimMontage); // 발사 애니메이션 몽타주 재생
+
 }
 
 void ACH3Character::FireReleased()
@@ -131,34 +223,44 @@ void ACH3Character::FireReleased()
 	{
 		CurrentWeaponInstance->StopFire();
 	}
+
+	// 사격 종료: 이동속도 복구(Completed)
+	if (UCharacterMovementComponent* Move = GetCharacterMovement())
+	{
+		if (bIsFiring)
+		{
+			Move->MaxWalkSpeed = WalkSpeedBeforeFire;
+			bIsFiring = false;
+		}
+	}
+	
 }
 
 void ACH3Character::Dash(const FInputActionValue& Value)
 {
-	float CurrentTime = GetWorld()->GetTimeSeconds();
+    float CurrentTime = GetWorld()->GetTimeSeconds();
 
-	if (CurrentTime - LastDashTime < DashCooldown)
-	{
-		return;
-	}
-	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
-	if (MovementComponent && MovementComponent->IsMovingOnGround())
-	{
-		// 플레이어의 마지막 입력 방향을 가져온다
-		FVector DashDirection = MovementComponent->GetLastInputVector();
+    if (CurrentTime - LastDashTime < DashCooldown)
+    {
+        return;
+    }
+    UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+    if (MovementComponent && MovementComponent->IsMovingOnGround())
+    {
+        FVector DashDirection = MovementComponent->GetLastInputVector();
+        if (DashDirection.IsNearlyZero())
+        {
+            return;
+        }
+        DashDirection.Z = 0.0f;
+        DashDirection.Normalize();
+        FVector DashVelocity = DashDirection * DashSpeed;
+        LaunchCharacter(DashVelocity, true, false);
+        LastDashTime = CurrentTime;
 
-		// 입력이 없으면 함수를 즉시 종료하여 대시가 실행되지 않도록 합니다.
-		if (DashDirection.IsNearlyZero())
-		{
-			return;
-		}
-		// 대시 방향의 Z축을 0으로 강제 설정한다
-		DashDirection.Z = 0.0f;
-		DashDirection.Normalize();
-		FVector DashVelocity = DashDirection * DashSpeed;
-		LaunchCharacter(DashVelocity, true, false);
-		LastDashTime = CurrentTime;
-	}
+        UpdateStatsUI();           // 즉시 0으로 초기화 반영
+        StartStatsUIAutoUpdate();  // 쿨타임 동안 주기적으로 UI 갱신
+    }
 }
 
 
@@ -181,6 +283,8 @@ void ACH3Character::EquipWeapon(TSubclassOf<AWeapon> NewWeaponClass)
 			CurrentWeaponInstance->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("hand_rSocket"));
 			CurrentWeaponInstance->SetOwner(this);
 			GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
+			// 무기 크기 조정
+			CurrentWeaponInstance->SetActorRelativeScale3D(FVector(0.7f));
 	}
 }
 
@@ -208,19 +312,20 @@ void ACH3Character::FireModeChanged(const FInputActionValue& Value)
 
 float ACH3Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	// 자신이 쏜 총알(Projectile, 무기 등)에 의한 데미지는 무시
 	if (DamageCauser && DamageCauser->GetOwner() == this)
 	{
-		return 0.0f; // 데미지 무시
+		return 0.0f;
 	}
 
-	Health -= DamageAmount; // 피해량만큼 체력을 감소시킨다
-	if (Health <= 0.0f) //체력이 0 이하가 되면 사망처리
+	Health = FMath::Clamp(Health - DamageAmount, 0.f, MaxHealth);
+	UpdateStatsUI(); // 체력 변경 즉시 UI 갱신
+
+	if (Health <= 0.0f)
 	{
 		Health = 0.0f;
 		Destroy();
 	}
-	return DamageAmount; // 실제로 입은 피해량을 반환
+	return DamageAmount;
 }
 
 void ACH3Character::PlayFireMontage()
@@ -303,4 +408,82 @@ FVector ACH3Character::GetAimTargetLocation(float TraceDistance) const
 	const FVector Start = CameraComp ? CameraComp->GetComponentLocation() : GetActorLocation();
 	const FVector Dir = CameraComp ? CameraComp->GetForwardVector() : GetActorForwardVector();
 	return Start + Dir * FallbackDistance;
+}
+
+void ACH3Character::StartStatsUIAutoUpdate()
+{
+	// HUD가 아직 없으면 시작하지 않음(생성 후 BeginPlay/EnsureCreateHUDs에서 다시 호출)
+	const bool bHasAnyHUD = (HUDWidgetInstance != nullptr) || (HUDWidgetInstances.Num() > 0);
+	if (!bHasAnyHUD)
+	{
+		return;
+	}
+
+	if (!GetWorldTimerManager().IsTimerActive(StatsUITimerHandle))
+	{
+		// 최초 1회 즉시 동기화
+		UpdateStatsUI();
+
+		// 주기적 갱신 시작
+		GetWorldTimerManager().SetTimer(
+			StatsUITimerHandle,
+			this, &ACH3Character::UpdateStatsUI,
+			FMath::Max(0.01f, StatsUIUpdateInterval), /*bLoop*/ true);
+	}
+}
+
+void ACH3Character::StopStatsUIAutoUpdate()
+{
+	if (GetWorldTimerManager().IsTimerActive(StatsUITimerHandle))
+	{
+		GetWorldTimerManager().ClearTimer(StatsUITimerHandle);
+	}
+}
+
+// 필요 시 자동 중지를 원한다면(UpdateStatsUI 끝에서 호출)
+void ACH3Character::UpdateStatsUI()
+{
+	// HP 퍼센트
+	const float HPPercent = (MaxHealth > 0.f) ? FMath::Clamp(Health / MaxHealth, 0.f, 1.f) : 0.f;
+
+	// 대시 쿨다운 퍼센트(1=준비완료)
+	float CooldownPercent = 1.f;
+	if (DashCooldown > 0.f)
+	{
+		const float Elapsed = GetWorld()->GetTimeSeconds() - LastDashTime;
+		CooldownPercent = FMath::Clamp(Elapsed / DashCooldown, 0.f, 1.f);
+	}
+
+	// UI 반영(Stats 위젯 직접 사용 중이면 그에 맞게 호출)
+	if (UCharacter_Stats_Widget* HUD = Cast<UCharacter_Stats_Widget>(HUDWidgetInstance))
+	{
+		HUD->SetProgressHPPercent(HPPercent);
+		HUD->SetProgressSTPercent(CooldownPercent);
+	}
+	for (const TPair<FName, TObjectPtr<UUserWidget>>& Pair : HUDWidgetInstances)
+	{
+		if (UCharacter_Stats_Widget* HUD2 = Cast<UCharacter_Stats_Widget>(Pair.Value))
+		{
+			HUD2->SetProgressHPPercent(HPPercent);
+			HUD2->SetProgressSTPercent(CooldownPercent);
+		}
+	}
+
+	// 선택: 값이 변하지 않고(에러바 이내) 대시가 100%면 타이머 자동 중지
+	constexpr float Epsilon = 0.001f;
+	const bool bHPUnchanged   = FMath::IsNearlyEqual(LastHPPercentSent,   HPPercent, Epsilon);
+	const bool bDashReady     = FMath::IsNearlyEqual(CooldownPercent, 1.f, Epsilon);
+	const bool bDashUnchanged = FMath::IsNearlyEqual(LastDashPercentSent, CooldownPercent, Epsilon);
+
+	if (!bHPUnchanged || !bDashUnchanged)
+	{
+		LastHPPercentSent   = HPPercent;
+		LastDashPercentSent = CooldownPercent;
+	}
+
+	// 체력 변화가 없고, 대시가 준비(1.0) 상태면 굳이 타이머를 계속 돌릴 필요 없음
+	if (bHPUnchanged && bDashReady)
+	{
+		StopStatsUIAutoUpdate();
+	}
 }
