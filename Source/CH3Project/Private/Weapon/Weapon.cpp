@@ -8,7 +8,10 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Character/CH3Character.h" 
+#include "GameMode/CH3GameMode.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+
 
 AWeapon::AWeapon()
 {
@@ -85,7 +88,6 @@ void AWeapon::StopFire()
 // HandleFire 함수는 무기가 발사될 때 호출됩니다.
 void AWeapon::HandleFire()
 {
-
 	if (bIsReloading || CurrentAmmo <= 0)
 	{
 
@@ -97,6 +99,15 @@ void AWeapon::HandleFire()
 	}
 
 	CurrentAmmo--;
+	auto* GameMode = UGameplayStatics::GetGameMode(GetWorld());
+	if (GameMode)
+	{
+		auto* MyGameMode = Cast<ACH3GameMode>(GameMode);
+		if (MyGameMode)
+		{
+			MyGameMode->UpdateWeaponMagazine_Size(FString::FromInt(CurrentAmmo));
+		}
+	}
 	
 	FVector SpawnLocation = MuzzleOffset->GetComponentLocation();
 	FRotator SpawnRotation = MuzzleOffset->GetComponentRotation();
@@ -104,12 +115,12 @@ void AWeapon::HandleFire()
 
 	// 베이스 캐릭터를 바탕으로, 플레이어 캐릭터, AI 캐릭터에 적용할 수 있는 확장성 확보
 
-	//if (ACH3Character* OwnerCharacter = Cast<ACH3Character>(GetOwner()))
-	//{
-	//	FVector AimTarget = OwnerCharacter->GetAimTargetLocation(); //GetAimTargetLocation 함수를 캐릭터 쪽에서 구현해줘야 함. 현재 미구동. // 성빈 : 확인했음
+	if (ACH3Character* OwnerCharacter = Cast<ACH3Character>(GetOwner()))
+	{
+		FVector AimTarget = OwnerCharacter->GetAimTargetLocation(); //GetAimTargetLocation 함수를 캐릭터 쪽에서 구현해줘야 함. 현재 미구동. // 성빈 : 확인했음
 
-	//	SpawnRotation = UKismetMathLibrary::FindLookAtRotation(SpawnLocation, AimTarget);
-	//}
+		SpawnRotation = UKismetMathLibrary::FindLookAtRotation(SpawnLocation, AimTarget);
+	}
 	
 	if (BulletActor)
 	{

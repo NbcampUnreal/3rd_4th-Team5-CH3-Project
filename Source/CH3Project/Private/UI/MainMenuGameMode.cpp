@@ -6,7 +6,7 @@
 
 AMainMenuGameMode::AMainMenuGameMode()
 {
-	static ConstructorHelpers::FClassFinder<APawn> defaultPawnClassFinder(TEXT("/Game/Bp_CH3Character/Bp_CH3Character.Bp_CH3Character"));
+	// static ConstructorHelpers::FClassFinder<APawn> defaultPawnClassFinder(TEXT("/Game/Bp_CH3Character/Bp_CH3Character.Bp_CH3Character"));
 	// 게임모드가 사용할 기본 플레이어 컨트롤러를 지정
 	PlayerControllerClass = AMainMenuController::StaticClass();
 	// ::StaticClass()는 C++ 클래스에 대한 언리얼 엔진의 UClass 정보를 가져오는 역할한다.

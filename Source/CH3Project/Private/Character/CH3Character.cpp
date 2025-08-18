@@ -12,8 +12,8 @@
 #include "GameFramework/Character.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
-
-
+#include "GameFramework/PlayerController.h"
+#include "Engine/EngineTypes.h"
 ACH3Character::ACH3Character()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -117,8 +117,6 @@ void ACH3Character::Fire(const FInputActionValue& Value)
 		CurrentWeaponInstance->StartFire();
 		// Release 이벤트가 발생하면 StopFire를 호출하도록 설정
 	}
-
-	
 }
 
 void ACH3Character::FireReleased()
@@ -143,9 +141,7 @@ void ACH3Character::Dash(const FInputActionValue& Value)
 	{
 		return;
 	}
-
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
-
 	if (MovementComponent && MovementComponent->IsMovingOnGround())
 	{
 		// 플레이어의 마지막 입력 방향을 가져온다
@@ -156,15 +152,11 @@ void ACH3Character::Dash(const FInputActionValue& Value)
 		{
 			return;
 		}
-
 		// 대시 방향의 Z축을 0으로 강제 설정한다
 		DashDirection.Z = 0.0f;
 		DashDirection.Normalize();
-
 		FVector DashVelocity = DashDirection * DashSpeed;
-
 		LaunchCharacter(DashVelocity, true, false);
-
 		LastDashTime = CurrentTime;
 	}
 }
@@ -179,17 +171,13 @@ void ACH3Character::EquipWeapon(TSubclassOf<AWeapon> NewWeaponClass)
 			CurrentWeaponInstance->Destroy(); // 파괴합니다.
 			CurrentWeaponInstance = nullptr; // 포인터를 nullptr로 초기화합니다.
 		}
-
-
 		// 새로운 무기 인스턴스를 스폰하여 CurrentWeaponInstance에 할당
 		CurrentWeaponInstance = GetWorld()->SpawnActor<AWeapon>(NewWeaponClass);
-
 			// 새로 생성된 무기의 콜리전을 비활성화하여 루프를 방지
 			if (CurrentWeaponInstance->GetMesh())
 			{
 				CurrentWeaponInstance->GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			}
-
 			CurrentWeaponInstance->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("hand_rSocket"));
 			CurrentWeaponInstance->SetOwner(this);
 			GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
@@ -273,3 +261,46 @@ void ACH3Character::PlayFireMontage()
 //		UE_LOG(LogTemp, Warning, TEXT("플레이어 컨트롤러가 유효하지 않습니다."));
 //	}
 //}
+
+FVector ACH3Character::GetAimTargetLocation(float TraceDistance) const
+{
+	// 플레이어 컨트롤러를 통해 마우스 커서 기준으로 조준 지점 계산
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		FVector2D MousePos;
+		// 마우스 좌표를 얻지 못하면 화면 중앙을 사용(패드/고정 시점 대비)
+		if (!PC->GetMousePosition(MousePos.X, MousePos.Y))
+		{
+			int32 SizeX = 0, SizeY = 0;
+			PC->GetViewportSize(SizeX, SizeY);
+			MousePos = FVector2D(SizeX * 0.5f, SizeY * 0.5f);
+		}
+
+		FVector WorldOrigin, WorldDir;
+		if (PC->DeprojectScreenPositionToWorld(MousePos.X, MousePos.Y, WorldOrigin, WorldDir))
+		{
+			const FVector TraceStart = WorldOrigin;
+			const FVector TraceEnd = TraceStart + WorldDir * TraceDistance;
+
+			FHitResult Hit;
+			FCollisionQueryParams Params(SCENE_QUERY_STAT(GetAimTarget), /*bTraceComplex*/ true);
+			Params.AddIgnoredActor(this);
+			if (CurrentWeaponInstance)
+			{
+				Params.AddIgnoredActor(CurrentWeaponInstance);
+			}
+
+			if (GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, ECC_Visibility, Params))
+			{
+				return Hit.ImpactPoint;
+			}
+			return TraceEnd;
+		}
+	}
+
+	// Fallback: 카메라(또는 액터) 전방으로 고정 거리
+	const float FallbackDistance = TraceDistance > 0.f ? TraceDistance : 100000.f;
+	const FVector Start = CameraComp ? CameraComp->GetComponentLocation() : GetActorLocation();
+	const FVector Dir = CameraComp ? CameraComp->GetForwardVector() : GetActorForwardVector();
+	return Start + Dir * FallbackDistance;
+}

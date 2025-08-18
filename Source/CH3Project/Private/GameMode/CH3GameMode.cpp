@@ -5,6 +5,7 @@
 #include "Character/CH3Character.h"
 #include "AI/BaseAICharacter.h"
 #include "Spawn/SpawnVolume.h"
+#include "UI/Weapon_Widget.h"
 
 ACH3GameMode::ACH3GameMode()
 {
@@ -35,6 +36,15 @@ void ACH3GameMode::BeginPlay()
 			HUDWidget->AddToViewport();
 		}
 	}
+	// Weapon HUD 생성 그림판
+	if (WeaponWidgetClass)
+	{
+		HUDWeaponWidget = CreateWidget<UWeapon_Widget>(GetWorld(), WeaponWidgetClass);
+		if (HUDWeaponWidget)
+		{
+			HUDWeaponWidget->AddToViewport();
+		}
+	}
 
 	// 플레이어 파괴 감시
 	if (ACharacter* PlayerChar = UGameplayStatics::GetPlayerCharacter(this, 0))
@@ -62,6 +72,14 @@ void ACH3GameMode::StartGame()
 		&ACH3GameMode::TickGameTimer, 1.f, true);
 
 	StartNextWave();
+}
+
+void ACH3GameMode::UpdateWeaponMagazine_Size(FString MS)
+{
+	if (HUDWeaponWidget)
+	{
+		HUDWeaponWidget->SetTextMagazine_Size(MS);
+	}
 }
 
 void ACH3GameMode::StartNextWave()
