@@ -3,6 +3,7 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/CH3Character.h"
+#include "Weapon/Weapon.h"
 #include "AI/BaseAICharacter.h"
 #include "Spawn/SpawnVolume.h"
 #include "UI/Weapon_Widget.h"
@@ -46,6 +47,24 @@ void ACH3GameMode::BeginPlay()
 		}
 	}
 
+	if (WeaponHUDClass)
+	{
+		WeaponHUD = CreateWidget<UUserWidget>(GetWorld(), WeaponHUDClass);
+		if (WeaponHUD)
+		{
+			WeaponHUD->AddToViewport();
+		}
+	}
+
+	if (HealthHUDClass)
+	{
+		HealthHUD = CreateWidget<UUserWidget>(GetWorld(), HealthHUDClass);
+		if (HealthHUD)
+		{
+			HealthHUD->AddToViewport();
+		}
+	}
+
 	// 플레이어 파괴 감시
 	if (ACharacter* PlayerChar = UGameplayStatics::GetPlayerCharacter(this, 0))
 	{
@@ -56,6 +75,19 @@ void ACH3GameMode::BeginPlay()
 	CurrentWaveIndex = -1;
 	KillCount = 0;
 	Score = 0;
+
+	// 무기 찾기
+	TArray<AActor*> FoundWeapons;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWeapon::StaticClass(), FoundWeapons);
+
+	for (AActor* Actor : FoundWeapons)
+	{
+		if (AWeapon* Weapon = Cast<AWeapon>(Actor))
+		{
+			WorldWeapons.Add(Weapon);
+			UE_LOG(LogTemp, Log, TEXT("Found Weapon : %s"), *Weapon->GetName());
+		}
+	}
 }
 
 void ACH3GameMode::StartGame()
@@ -141,6 +173,7 @@ void ACH3GameMode::OnPlayerDestroyed(AActor* DestroyedActor)
 	ReportPlayerDeath();
 }
 
+
 void ACH3GameMode::CheckWaveEnd()
 {
 	if (!bGameActive) return;
@@ -206,9 +239,6 @@ void ACH3GameMode::ReportEnemyDeath()
 	++KillCount;
 	Score += 100;
 
-	UpdateHUDScore();
-	UpdateHUDKills();
-
 	CheckWaveEnd();
 }
 
@@ -225,29 +255,28 @@ void ACH3GameMode::UpdateHUDTimer()
 	{
 		if (UTextBlock* TimerText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("HUD_Timer"))))
 		{
-			TimerText->SetText(FText::FromString(FString::Printf(TEXT("%d"), RemainingTimeSeconds)));
+			TimerText->SetText(
+				FText::FromString(FString::Printf(TEXT("남은 시간: %d"), RemainingTimeSeconds))
+			);
 		}
 	}
 }
 
-void ACH3GameMode::UpdateHUDScore()
+AWeapon* ACH3GameMode::GetPlayerCurrentWeapon() const
 {
-	if (HUDWidget && HUDWidget->GetWidgetFromName(TEXT("HUD_Score")))
+	if (ACharacter* PlayerChar = UGameplayStatics::GetPlayerCharacter(this, 0))
 	{
-		if (UTextBlock* ScoreText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("HUD_Score"))))
-		{
-			ScoreText->SetText(FText::FromString(FString::Printf(TEXT("Score: %d"), Score)));
-		}
-	}
-}
+		// 플레이어의 자식 Actor 중 무기를 검색
+		TArray<AActor*> AttachedActors;
+		PlayerChar->GetAttachedActors(AttachedActors);
 
-void ACH3GameMode::UpdateHUDKills()
-{
-	if (HUDWidget && HUDWidget->GetWidgetFromName(TEXT("HUD_Kills")))
-	{
-		if (UTextBlock* KillText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("HUD_Kills"))))
+		for (AActor* Actor : AttachedActors)
 		{
-			KillText->SetText(FText::FromString(FString::Printf(TEXT("Kills: %d"), KillCount)));
+			if (AWeapon* Weapon = Cast<AWeapon>(Actor))
+			{
+				return Weapon;
+			}
 		}
 	}
+	return nullptr;
 }
