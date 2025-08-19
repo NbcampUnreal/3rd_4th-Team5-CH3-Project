@@ -148,9 +148,11 @@ void ACH3Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 			}
 			if (MyController->FireAction)
 			{
-				EnhancedInputComponent->BindAction(MyController->FireAction, ETriggerEvent::Started, this, &ACH3Character::Fire); // 단발 모드에서 즉시 발사
-
-				EnhancedInputComponent->BindAction(MyController->FireAction, ETriggerEvent::Completed, this, &ACH3Character::FireReleased); // 연사 모드에서 StopFire를 호출하기 위해 Completed 이벤트도 바인딩
+				// Started 누락 대비: 첫 프레임 보장
+				EnhancedInputComponent->BindAction(MyController->FireAction, ETriggerEvent::Triggered, this, &ACH3Character::FireTriggered);
+				EnhancedInputComponent->BindAction(MyController->FireAction, ETriggerEvent::Started, this, &ACH3Character::Fire);
+				EnhancedInputComponent->BindAction(MyController->FireAction, ETriggerEvent::Completed, this, &ACH3Character::FireReleased);
+				EnhancedInputComponent->BindAction(MyController->FireAction, ETriggerEvent::Canceled, this, &ACH3Character::FireReleased);
 			}
 			if (MyController->DashAction)
 			{
@@ -160,10 +162,10 @@ void ACH3Character::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 			{
 				EnhancedInputComponent->BindAction(MyController->FireModeAction, ETriggerEvent::Triggered, this, &ACH3Character::FireModeChanged);
 			}
-			/*if(MyController->UiPauseAction)
+			if(MyController->UiPauseAction)
 			{
 				EnhancedInputComponent->BindAction(MyController->UiPauseAction, ETriggerEvent::Triggered, this, &ACH3Character::UiPause);
-			}*/
+			}
 		}
 	}
 
@@ -310,6 +312,29 @@ void ACH3Character::FireModeChanged(const FInputActionValue& Value)
 	}
 }
 
+void ACH3Character::FireTriggered(const FInputActionValue& Value)
+{
+	// 눌림 첫 프레임에만 동작(Started가 누락된 경우 보조)
+	if (!CurrentWeaponInstance || bFireHeld)
+	{
+		return;
+	}
+	bFireHeld = true;
+
+	// 단발/연사 처리
+	if (CurrentWeaponInstance->GetFireMode() == EFireMode::SemiAuto)
+	{
+		CurrentWeaponInstance->HandleFire();
+	}
+	else
+	{
+		CurrentWeaponInstance->StartFire();
+	}
+
+	PlayFireMontage();
+	PlayAnimMontage(FireAnimMontage);
+}
+
 float ACH3Character::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	if (DamageCauser && DamageCauser->GetOwner() == this)
@@ -348,24 +373,24 @@ void ACH3Character::PlayFireMontage()
 	}
 }
 
-//void ACH3Character::UiPause(const FInputActionValue& Value)
-//{
-//	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-//	{
-//		if (AMainMenuController* MainMenuController = Cast<AMainMenuController>(PlayerController)) // 메뉴호출 함수 만들어줘야함
-//		{
-//			MainMenuController->TogglePauseMenu(); // 메인 메뉴 컨트롤러의 토글 함수 호출
-//		}
-//		else
-//		{
-//			UE_LOG(LogTemp, Warning, TEXT("메인 메뉴 컨트롤러가 유효하지 않습니다."));
-//		}
-//	}
-//	else
-//	{
-//		UE_LOG(LogTemp, Warning, TEXT("플레이어 컨트롤러가 유효하지 않습니다."));
-//	}
-//}
+void ACH3Character::UiPause(const FInputActionValue& Value)
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		// 인게임 플레이어 컨트롤러
+		if (ACH3PlayerController* GamePC = Cast<ACH3PlayerController>(PC))
+		{
+			GamePC->TogglePauseMenu();
+			return;
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("일시정지 토글을 지원하는 컨트롤러가 아닙니다."));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("플레이어 컨트롤러가 유효하지 않습니다."));
+	}
+}
 
 FVector ACH3Character::GetAimTargetLocation(float TraceDistance) const
 {

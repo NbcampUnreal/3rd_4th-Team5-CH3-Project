@@ -59,6 +59,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void EquipWeapon(TSubclassOf<AWeapon> NewWeaponClass);
 	void FireReleased();
+	void FireTriggered(const FInputActionValue& Value); // ← 추가
 	
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser); // 캐릭터가 피해를 입었을 때 호출되는 함수
@@ -125,7 +126,6 @@ protected:
 	// 중복 생성 방지 포함 생성 헬퍼
 	void EnsureCreateHUDs();
 
-	// ===== Stats UI 타이머 =====
 	// 업데이트 주기(초). 필요에 따라 조정(0.05f = 20Hz)
 	UPROPERTY(EditAnywhere, Category="UI")
 	float StatsUIUpdateInterval = 0.05f;
@@ -138,4 +138,8 @@ protected:
 	// 선택: 자동 중지 기준을 위해 마지막 전송 값 캐시(미세 변경 무시용)
 	float LastHPPercentSent = -1.f;
 	float LastDashPercentSent = -1.f;
+
+	// 발사 입력 보조 상태
+	UPROPERTY(Transient)
+	bool bFireHeld = false; // 이미 선언되어 있으면 유지
 };

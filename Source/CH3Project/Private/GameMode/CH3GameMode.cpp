@@ -27,15 +27,15 @@ void ACH3GameMode::BeginPlay()
 		}
 	}
 
-	// HUD 생성
-	if (HUDWidgetClass)
-	{
-		HUDWidget = CreateWidget<UHUD_Widget>(GetWorld(), HUDWidgetClass);
-		if (HUDWidget)
-		{
-			HUDWidget->AddToViewport();
-		}
-	}
+	//// HUD 생성
+	//if (HUDWidgetClass)
+	//{
+	//	HUDWidget = CreateWidget<UHUD_Widget>(GetWorld(), HUDWidgetClass);
+	//	if (HUDWidget)
+	//	{
+	//		HUDWidget->AddToViewport();
+	//	}
+	//}
 	// Weapon HUD 생성 그림판
 	if (WeaponWidgetClass)
 	{
