@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "CH3GameMode.generated.h"
+#include "Weapon/Weapon.h"
 
 class ASpawnVolume;
 class ABaseAICharacter;
@@ -49,6 +50,9 @@ protected:
 	UPROPERTY()
 	TArray<TObjectPtr<ASpawnVolume>> SpawnVolumes;
 
+	UPROPERTY()
+	TArray<TObjectPtr<AWeapon>> WorldWeapons;
+
 	// 게임 시간
 	int32 RemainingTimeSeconds = 0;
 
@@ -70,6 +74,20 @@ protected:
 	UPROPERTY()
 	UHUD_Widget* HUDWidget;
 
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> WeaponHUDClass;
+
+	UPROPERTY()
+	UUserWidget* WeaponHUD;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> HealthHUDClass;
+
+	UPROPERTY()
+	UUserWidget* HealthHUD;
+
+
+
 	// 내부 함수
 	void StartNextWave();
 	void SpawnOneEnemy();
@@ -80,8 +98,6 @@ protected:
 
 	// HUD 업데이트
 	void UpdateHUDTimer();
-	void UpdateHUDScore();
-	void UpdateHUDKills();
 
 	// 델리게이트 콜백
 	UFUNCTION()
@@ -95,4 +111,7 @@ public:
 	void StartGame();
 	void ReportEnemyDeath();
 	void ReportPlayerDeath();
+
+	const TArray<TObjectPtr<AWeapon>>& GetWorldWeapons() const { return WorldWeapons; }
+	AWeapon* GetPlayerCurrentWeapon() const;
 };
