@@ -1,4 +1,4 @@
-# 🎮 콘크리트 래버린치 (가제)
+# 🎮 Under Siege
 
 > **[싱글 플레이]**, TPS, 실내 탑다운 방식, 최고 점수 갱신을 목적으로 하는 아레나 슈터 게임
 
@@ -142,9 +142,39 @@
 
 ---
 
-## 📸 스크린샷 / 데모 영상
+<details> 
+<summary>🍀 필수 기능</summary>
 
-> 이미지 및 데모 영상은 `/Screenshots` 폴더에 추가 예정입니다.
+🟢 캐릭터 이동 및 상태 변화 
 
-```md
-![Demo Screenshot](./Screenshots/demo1.png)
+🟢 무기 발사 및 데미지 처리 
+
+🟢 적 AI 
+
+🟢 게임 모드 시스템 
+
+🟢 UI 시스템 
+
+</details> 
+
+<details> 
+<summary>🕹️ 도전 기능</summary>
+
+🔴 보스전 시스템
+
+🟢 고급 무기 시스템
+
+🔴 인벤토리 시스템
+
+</details> 
+
+<details> 
+<summary>🔥 추가 아이디어</summary>
+
+🟢 웨이브 기반 무작위 스폰
+
+🟢 맵 구조 랜덤 생성
+
+🔴 실시간 점수 랭킹 출력
+
+</details>
