@@ -141,7 +141,7 @@
 - Behavior Tree + EQS (AI 예정)
 
 ---
-
+## 최종적으로 구현한 기능 목록
 <details> 
 <summary>🍀 필수 기능</summary>
 
